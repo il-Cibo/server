@@ -32,7 +32,7 @@ module.exports = {
         type: Sequelize.ARRAY(Sequelize.INTEGER)
       },
       plan: {
-        type: Sequelize.ARRAY(Sequelize.STRING)
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
