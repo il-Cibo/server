@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.belongsToMany(models.Recipe, { through: models.UserRecipe });
     }
   };
   User.init({
@@ -31,12 +32,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     avatar: {
       type: DataTypes.STRING,
-    },
-    favorites: {
-      type: DataTypes.ARRAY(DataTypes.INTEGER),
-    },
-    plan: {
-      type: DataTypes.STRING
     }
   }, {
     sequelize,
