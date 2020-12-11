@@ -14,8 +14,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   RecipeTag.init({
-    RecipeId: DataTypes.INTEGER,
-    TagId: DataTypes.INTEGER
+    RecipeId: {
+      type: DataTypes.INTEGER,
+    },
+    TagId: {
+      type: DataTypes.INTEGER
+    }
   }, {
     sequelize,
     modelName: 'RecipeTag',

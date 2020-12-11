@@ -17,6 +17,12 @@ module.exports = {
       image: {
         type: Sequelize.STRING
       },
+      serving: {
+        type: Sequelize.INTEGER
+      },
+      timeCook: {
+        type: Sequelize.INTEGER
+      },
       ingredients: {
         type: Sequelize.ARRAY(Sequelize.STRING)
       },
