@@ -34,11 +34,8 @@ module.exports = (sequelize, DataTypes) => {
     serving: {
       type: DataTypes.INTEGER,
     },
-    timeCook: {
+    time: {
       type: DataTypes.INTEGER,
-    },
-    UserId: {
-      type: DataTypes.INTEGER
     }
   }, {
     sequelize,
