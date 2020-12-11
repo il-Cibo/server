@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Recipe.belongsToMany(models.User, { through: models.UserRecipe });
+      Recipe.belongsToMany(models.Tag, { through: models.RecipeTag });
     }
   };
   Recipe.init({
