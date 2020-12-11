@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const { ApolloServer, gql, makeExecutableSchema } = require('apollo-server')
 const { RecipeController } = require('./controllers')
 
@@ -20,6 +22,10 @@ const server = new ApolloServer({
   schema
 });
 
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen().then(() => {
+    console.log(`🚀  Server ready at ${url}`);
+  });
+}
+
+module.exports = server
