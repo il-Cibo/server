@@ -1,4 +1,5 @@
 const { ApolloServer, gql, makeExecutableSchema } = require('apollo-server')
+const { RecipeController } = require('./controllers')
 
 const typeDefs = gql`
   type Query
@@ -8,8 +9,10 @@ const typeDefs = gql`
 const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
+    RecipeController.typeDefs
   ],
   resolvers: [
+    RecipeController.resolvers
   ]
 })
 
