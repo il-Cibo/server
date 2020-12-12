@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon app",
     "test": "jest --detectOpenHandles --verbose"
   },
   "keywords": [],

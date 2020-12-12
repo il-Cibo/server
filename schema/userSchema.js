@@ -53,7 +53,7 @@ const resolvers = {
       const { user } = args; 
       return await UserController.login(user);
     },
-    user: async (__, context) => {
+    user: async (parent, args, context) => {
       if (!context.user) throw new AuthenticationError('Please login first');
       const { user } = context;
       return await UserController.find(user.id);
