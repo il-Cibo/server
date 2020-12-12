@@ -30,7 +30,6 @@ const schema = makeExecutableSchema({
 const server = new ApolloServer({
   schema,
   context: async ({ req }) => {
-    console.log(req)
     // ! get the user token from the headers
     const token = req.headers.token || '';
 
@@ -52,10 +51,10 @@ const server = new ApolloServer({
   }
 });
 
-if (process.env.NODE_ENV !== 'test') {
+// if (process.env.NODE_ENV !== 'test') {
   server.listen().then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
   });
-}
+// }
 
 module.exports = server
