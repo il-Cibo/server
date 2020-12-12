@@ -1,4 +1,4 @@
-const { Recipe, UserRecipe, Tag } = require('../models/')
+const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/')
 const { gql } = require('apollo-server')
 
 
@@ -32,8 +32,8 @@ const typeDefs = gql`
       recipes: [Recipe]
     }
     extend type Mutation {
-      addRecipe(recipe: NewRecipe): Recipe
-      editRecipe(id: Int! recipe: NewRecipe): Recipe
+      addRecipe(recipe: NewRecipe, tags: [String!]): Recipe
+      editRecipe(id: Int! recipe: NewRecipe, tags: [String!]): Recipe
       deleteRecipe(id: Int!): Response
     }`
 
@@ -58,9 +58,9 @@ const resolvers = {
     }
   },
   Mutation: {
-    addRecipe: async (_, args) => {
+    addRecipe: async (_, args, context) => {
       try {
-        // if (!context.user) throw new AuthenticationError("Please login first");
+        if (!context.user) throw new AuthenticationError("Please login first");
         const { id } = context.user;
         const data = await Recipe.create(args.recipe);
         const dataUserRecipe = {
@@ -71,10 +71,10 @@ const resolvers = {
         };
         const userRecipe = await UserRecipe.create(dataUserRecipe);
         const { tags } = args;
-        for (tag in tags) {
+        for (i in tags) {
           let newTag = await Tag.findOrCreate({
             where: {
-              name: tag.trim().toLowerCase()
+              name: tags[i].trim().toLowerCase()
             }
           });
           let newPayload = {
@@ -86,42 +86,48 @@ const resolvers = {
         const result = await Recipe.findByPk(data.id, {
           include: Tag
         })
+        console.log(result)
         return result;
       } catch (error) {
         console.log(error)
       }
     },
-    editRecipe: async (_, args) => {
+    editRecipe: async (_, args, context) => {
       try {
-        // if (!context.user) throw new AuthenticationError("Please login first");
+        if (!context.user) throw new AuthenticationError("Please login first");
         const data = await Recipe.update(args.recipe, {
           where: { id: args.id },
           returning: true
         });
         const { tags } = args;
-        for (tag in tags) {
+        await RecipeTag.destroy({ where: { RecipeId: data[1][0].id } })
+        for (i in tags) {
           let newTag = await Tag.findOrCreate({
             where: {
-              name: tag.trim().toLowerCase()
+              name: tags[i].trim().toLowerCase()
             }
           });
           let newPayload = {
-            RecipeId: data.id,
+            RecipeId: data[1][0].id,
             TagId: newTag[0].id
           };
           await RecipeTag.findOrCreate({
             where: newPayload
           });
         }
-        return data[1][0].dataValues;
+        const result = await Recipe.findByPk(data[1][0].id, {
+          include: Tag
+        })
+        return result;
       } catch (error) {
         console.log(error)
       }
     },
-    deleteRecipe: async (_, args) => {
+    deleteRecipe: async (_, args, context) => {
       try {
-        // if (!context.user) throw new AuthenticationError("Please login first");
+        if (!context.user) throw new AuthenticationError("Please login first");
         await Recipe.destroy({ where: { id: args.id } });
+        await RecipeTag.destroy({ where: { RecipeId: args.id } })
         return { message: "Recipe has been deleted" };
       } catch (error) {
         console.log(error)

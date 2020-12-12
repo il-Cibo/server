@@ -2,6 +2,14 @@ const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
 const server = require('../app')
 const { query, mutate } = createTestClient(server);
+server.context = () => {
+  const req = {
+    headers: {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhc2QiLCJpYXQiOjE2MDc3NjA2Njl9.GbGpRpJDyKQKDRvAvsGHhNwyvAEQe82NSpnJ-G9n_nc"
+    }
+  }
+  return { req }
+};
 // const { Recipe } = require('../models/');
 
 // beforeAll(() => {
@@ -14,25 +22,28 @@ const { query, mutate } = createTestClient(server);
 //   Recipe.destroy({ where: { id: 1 } }).then(console.log)
 // })
 
+//stack isEmail
+
 test('fetch all recipe success', async () => {
 
   const test = await query({
     query: gql`
-    query {
-      recipes {
-        id
-        title
-        description
-        image
-        ingredients
-        step
-        serving
-        time
-      }
-    }`
+      query {
+        recipes {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+        }
+      }`
   })
   console.log(test.data)
 });
+
 
 test('fetch one recipe success', async () => {
 
