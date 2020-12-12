@@ -18,8 +18,6 @@ class UserController {
       }
     });
 
-    console.log(user);
-
     if (!user) throw new AuthenticationError ('Invalid email or password');
 
     if (!Bcrypt.comparePassword(password, user.password)) throw new AuthenticationError ('Invalid email or password');
