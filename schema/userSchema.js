@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server');
+const { gql, AuthenticationError } = require('apollo-server');
 const UserController = require('../controllers/user');
 
 const typeDefs = gql`
@@ -48,18 +48,19 @@ const typeDefs = gql`
 `
 
 const resolvers = {
-  Query = {
+  Query: {
     login: async (_, args) => {
       const { user } = args; 
       return await UserController.login(user);
     },
-    user: async (_, context) => {
+    user: async (__, context) => {
+      if (!context.user) throw new AuthenticationError('Please login first');
       const { user } = context;
       return await UserController.find(user.id);
     }
   },
 
-  Mutation = {
+  Mutation: {
     register: async (_, args) => {
       const { user } = args;
       return await UserController.register(user);
