@@ -1,6 +1,8 @@
 require('dotenv').config()
-
-const { ApolloServer, gql, makeExecutableSchema } = require('apollo-server')
+const { ApolloServer, gql, makeExecutableSchema, AuthenticationError } = require('apollo-server');
+const UserController = require('./controllers/user');
+const JSONWebToken = require('./helpers/jwt');
+const userSchema = require('./schema/userSchema');
 const { RecipeController } = require('./controllers')
 
 const typeDefs = gql`
@@ -11,19 +13,37 @@ const typeDefs = gql`
 const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
-    RecipeController.typeDefs
+    RecipeController.typeDefs,
+    userSchema.typeDefs
   ],
   resolvers: [
-    RecipeController.resolvers
+    RecipeController.resolvers,
+    userSchema.resolvers 
   ]
 })
 
 const server = new ApolloServer({
-  schema
+  schema,
+  context: async ({ req }) => {
+      // ! get the user token from the headers
+      const token = req.headers.token || '';
+
+      const decoded = JSONWebToken.verifyToken(token);
+  
+      if (!decoded) throw new AuthenticationError('You must login first');
+      
+      // ! try to retrieve a user with the token
+      const user = await UserController.find(decoded.id);
+
+      if (!user) throw new AuthenticationError('You must login first');
+      
+      // ! add the user to the context
+      return { user };
+    }
 });
 
 if (process.env.NODE_ENV !== 'test') {
-  server.listen().then(() => {
+  server.listen().then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
   });
 }
