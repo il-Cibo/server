@@ -28,14 +28,18 @@ const server = new ApolloServer({
       // ! get the user token from the headers
       const token = req.headers.token || '';
 
+      if (!token)  return {
+        user: null
+      }
+
       const decoded = JSONWebToken.verifyToken(token);
   
-      if (!decoded) throw new AuthenticationError('You must login first');
+      if (!decoded) throw new AuthenticationError('Invalid username or password');
       
       // ! try to retrieve a user with the token
       const user = await UserController.find(decoded.id);
 
-      if (!user) throw new AuthenticationError('You must login first');
+      if (!user) throw new AuthenticationError('Invalid username or password');
       
       // ! add the user to the context
       return { user };
