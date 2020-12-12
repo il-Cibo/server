@@ -1,8 +1,13 @@
-const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/')
-const { gql } = require('apollo-server')
+const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/');
+const { Op } = require('sequelize');
+const { gql, ForbiddenError } = require('apollo-server')
 
 
 const typeDefs = gql`
+    type Tag {
+      name: String
+    }
+
     type Recipe {
       id: Int
       title: String
@@ -12,10 +17,13 @@ const typeDefs = gql`
       step: [String]
       serving: Int
       time: Int
+      Tags: [Tag]
     }
+
     type Response {
       message: String
     }
+
     input NewRecipe {
       title: String!
       description: String!
@@ -28,6 +36,7 @@ const typeDefs = gql`
     extend type Query {
       recipe(id: Int!): Recipe
       recipes: [Recipe]
+      queryRecipes(query: String!): [Recipe]
     }
     extend type Mutation {
       addRecipe(recipe: NewRecipe, tags: [String!]): Recipe
@@ -39,98 +48,129 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     recipe: async (_, args) => {
-      try {
-        const data = await Recipe.findOne({ where: { UserId: args.id }, include: { model: Tag } })
-        return data
-      } catch (error) {
-        console.log(error)
-      }
+      if (!context.user) throw new AuthenticationError("Please login first");
+      const data = await Recipe.findOne({ where: { UserId: args.id }, include: { model: Tag } })
+      return data
     },
     recipes: async () => {
-      try {
-        const data = await Recipe.findAll({ include: { model: Tag } })
-        return data
-      } catch (error) {
-        console.log(error)
-      }
+      if (!context.user) throw new AuthenticationError("Please login first");
+      const data = await Recipe.findAll({ include: { model: Tag } })
+      return data
+    },
+    queryRecipes: async (_, args) => {
+      if (!context.user) throw new AuthenticationError("Please login first");
+      const { query } = args;
+
+      const result = Recipe.findAll({
+        where: {
+          [Op.or]: [
+            {
+              title: {
+                [Op.iLike]: `%${query}%`
+              }
+            },
+            {
+              '$Tags.name$': {
+                [Op.iLike]: `%${query}%`
+              }
+            }
+          ]
+        },
+        include: Tag
+      });
+
+      return result;
     }
   },
   Mutation: {
     addRecipe: async (_, args, context) => {
-      try {
-        if (!context.user) throw new AuthenticationError("Please login first");
-        const { id } = context.user;
-        const data = await Recipe.create(args.recipe);
-        const dataUserRecipe = {
-          UserId: id,
+      if (!context.user) throw new AuthenticationError("Please login first");
+      const { id } = context.user;
+      const data = await Recipe.create(args.recipe);
+      const dataUserRecipe = {
+        UserId: id,
+        RecipeId: data.id,
+        favorites: false,
+        plan: [],
+        creation: true
+      };
+      const userRecipe = await UserRecipe.create(dataUserRecipe);
+      const { tags } = args;
+      for (i in tags) {
+        let newTag = await Tag.findOrCreate({
+          where: {
+            name: tags[i].trim().toLowerCase()
+          }
+        });
+        let newPayload = {
           RecipeId: data.id,
-          favorites: false,
-          plan: [],
-          creation: true
+          TagId: newTag[0].id
         };
-        const userRecipe = await UserRecipe.create(dataUserRecipe);
-        const { tags } = args;
-        for (i in tags) {
-          let newTag = await Tag.findOrCreate({
-            where: {
-              name: tags[i].trim().toLowerCase()
-            }
-          });
-          let newPayload = {
-            RecipeId: data.id,
-            TagId: newTag[0].id
-          };
-          await RecipeTag.create(newPayload);
-        }
-        const result = await Recipe.findByPk(data.id, {
-          include: Tag
-        })
-        console.log(result)
-        return result;
-      } catch (error) {
-        console.log(error)
+        await RecipeTag.create(newPayload);
       }
+      const result = await Recipe.findByPk(data.id, {
+        include: Tag
+      })
+      console.log(result)
+      return result;
     },
     editRecipe: async (_, args, context) => {
-      try {
-        if (!context.user) throw new AuthenticationError("Please login first");
-        const data = await Recipe.update(args.recipe, {
-          where: { id: args.id },
-          returning: true
-        });
-        const { tags } = args;
-        await RecipeTag.destroy({ where: { RecipeId: data[1][0].id } })
-        for (i in tags) {
-          let newTag = await Tag.findOrCreate({
-            where: {
-              name: tags[i].trim().toLowerCase()
-            }
-          });
-          let newPayload = {
-            RecipeId: data[1][0].id,
-            TagId: newTag[0].id
-          };
-          await RecipeTag.findOrCreate({
-            where: newPayload
-          });
+      if (!context.user) throw new AuthenticationError("Please login first");
+
+      const { user } = context;
+
+      const authorization = await RecipeTag.findOne({
+        where: {
+          RecipeId: args.id,
+          UserId: user.id
         }
-        const result = await Recipe.findByPk(data[1][0].id, {
-          include: Tag
-        })
-        return result;
-      } catch (error) {
-        console.log(error)
+      })
+
+      if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
+
+      if(!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
+
+      const data = await Recipe.update(args.recipe, {
+        where: { id: args.id },
+        returning: true
+      });
+      const { tags } = args;
+      await RecipeTag.destroy({ where: { RecipeId: data[1][0].id } })
+      for (i in tags) {
+        let newTag = await Tag.findOrCreate({
+          where: {
+            name: tags[i].trim().toLowerCase()
+          }
+        });
+        let newPayload = {
+          RecipeId: data[1][0].id,
+          TagId: newTag[0].id
+        };
+        await RecipeTag.findOrCreate({
+          where: newPayload
+        });
       }
+      const result = await Recipe.findByPk(data[1][0].id, {
+        include: Tag
+      })
+      return result;
     },
     deleteRecipe: async (_, args, context) => {
-      try {
-        if (!context.user) throw new AuthenticationError("Please login first");
-        await Recipe.destroy({ where: { id: args.id } });
-        await RecipeTag.destroy({ where: { RecipeId: args.id } })
-        return { message: "Recipe has been deleted" };
-      } catch (error) {
-        console.log(error)
-      }
+      if (!context.user) throw new AuthenticationError("Please login first");
+
+      const authorization = await RecipeTag.findOne({
+        where: {
+          RecipeId: args.id,
+          UserId: user.id
+        }
+      })
+
+      if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
+
+      if(!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
+      await Recipe.destroy({ where: { id: args.id } });
+      await RecipeTag.destroy({ where: { RecipeId: args.id } })
+      return { message: "Recipe has been deleted" };
     }
   }
 }
