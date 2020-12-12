@@ -52,7 +52,8 @@ const resolvers = {
       const data = await Recipe.findOne({ where: { UserId: args.id }, include: { model: Tag } })
       return data
     },
-    recipes: async () => {
+    recipes: async (parent, args, context) => {
+      // console.log(context, '<<<<<<<<<<<<<<<< server')
       if (!context.user) throw new AuthenticationError("Please login first");
       const data = await Recipe.findAll({ include: { model: Tag } })
       return data
@@ -119,7 +120,7 @@ const resolvers = {
 
       const { user } = context;
 
-      const authorization = await RecipeTag.findOne({
+      const authorization = await UserRecipe.findOne({
         where: {
           RecipeId: args.id,
           UserId: user.id
@@ -158,7 +159,7 @@ const resolvers = {
     deleteRecipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
 
-      const authorization = await RecipeTag.findOne({
+      const authorization = await UserRecipe.findOne({
         where: {
           RecipeId: args.id,
           UserId: user.id
