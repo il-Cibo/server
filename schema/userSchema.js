@@ -25,6 +25,7 @@ const typeDefs = gql`
   }
 
   type UserData {
+    id: Int
     username: String
     email: String
     gender: String
@@ -50,7 +51,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     login: async (_, args) => {
-      const { user } = args; 
+      const { user } = args;
       return await UserController.login(user);
     },
     user: async (parent, args, context) => {

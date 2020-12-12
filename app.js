@@ -18,32 +18,33 @@ const schema = makeExecutableSchema({
   ],
   resolvers: [
     RecipeController.resolvers,
-    userSchema.resolvers 
+    userSchema.resolvers
   ]
 })
 
 const server = new ApolloServer({
   schema,
   context: async ({ req }) => {
-      // ! get the user token from the headers
-      const token = req.headers.token || '';
+    console.log(req)
+    // ! get the user token from the headers
+    const token = req.headers.token || '';
 
-      if (!token)  return {
-        user: null
-      }
-
-      const decoded = JSONWebToken.verifyToken(token);
-  
-      if (!decoded) throw new AuthenticationError('Invalid username or password');
-      
-      // ! try to retrieve a user with the token
-      const user = await UserController.find(decoded.id);
-
-      if (!user) throw new AuthenticationError('Invalid username or password');
-      
-      // ! add the user to the context
-      return { user };
+    if (!token) return {
+      user: null
     }
+
+    const decoded = JSONWebToken.verifyToken(token);
+
+    if (!decoded) throw new AuthenticationError('Invalid username or password');
+
+    // ! try to retrieve a user with the token
+    const user = await UserController.find(decoded.id);
+
+    if (!user) throw new AuthenticationError('Invalid username or password');
+
+    // ! add the user to the context
+    return { user };
+  }
 });
 
 if (process.env.NODE_ENV !== 'test') {
