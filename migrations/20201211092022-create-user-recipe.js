@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       plan: {
-        type: Sequelize.ARRAY(Sequelize.DATEONLY)
+        type: Sequelize.ARRAY(Sequelize.STRING)
       },
       createdAt: {
         allowNull: false,
