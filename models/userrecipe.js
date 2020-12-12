@@ -17,7 +17,10 @@ module.exports = (sequelize, DataTypes) => {
     UserId: DataTypes.INTEGER,
     RecipeId: DataTypes.INTEGER,
     favorites: DataTypes.BOOLEAN,
-    plan: DataTypes.ARRAY(DataTypes.DATEONLY)
+    plan: DataTypes.ARRAY(DataTypes.STRING),
+    creation: {
+      type: DataTypes.BOOLEAN
+    }
   }, {
     sequelize,
     modelName: 'UserRecipe',

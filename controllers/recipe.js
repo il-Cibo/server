@@ -12,7 +12,6 @@ const typeDefs = gql`
       step: [String]
       serving: Int
       time: Int
-      creation: Boolean
     }
     type Response {
       message: String
@@ -25,7 +24,6 @@ const typeDefs = gql`
       step: [String!]
       serving: Int!
       time: Int!
-      creation: Boolean!
     }
     extend type Query {
       recipe(id: Int!): Recipe
@@ -67,7 +65,8 @@ const resolvers = {
           UserId: id,
           RecipeId: data.id,
           favorites: false,
-          plan: []
+          plan: [],
+          creation: true
         };
         const userRecipe = await UserRecipe.create(dataUserRecipe);
         const { tags } = args;

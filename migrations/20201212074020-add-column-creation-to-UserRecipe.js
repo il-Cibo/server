@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn('Recipes', 'creation', Sequelize.BOOLEAN);
+    await queryInterface.addColumn('UserRecipes', 'creation', Sequelize.BOOLEAN);
     /**
      * Add altering commands here.
      *
@@ -12,7 +12,7 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeColumn('Recipes', 'creation');
+    await queryInterface.removeColumn('UserRecipes', 'creation');
     /**
      * Add reverting commands here.
      *
