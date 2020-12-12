@@ -1,5 +1,5 @@
-// require('dotenv').config()
-const { ApolloServer, gql, makeExecutableSchema, AuthenticationError } = require('apollo-server');
+require('dotenv').config()
+const { ApolloServer, gql, makeExecutableSchema, AuthenticationError, GraphQLUpload } = require('apollo-server');
 const UserController = require('./controllers/user');
 const JSONWebToken = require('./helpers/jwt');
 const userSchema = require('./schema/userSchema');
@@ -9,6 +9,7 @@ const { RecipeController } = require('./controllers')
 const typeDefs = gql`
   type Query
   type Mutation
+  scalarUpload
 `
 
 const schema = makeExecutableSchema({
@@ -19,6 +20,7 @@ const schema = makeExecutableSchema({
     userRecipeSchema.typeDefs
   ],
   resolvers: [
+    { Upload: GraphQLUpload },
     RecipeController.resolvers,
     userSchema.resolvers,
     userRecipeSchema.resolvers
