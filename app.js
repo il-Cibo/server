@@ -26,12 +26,12 @@ const server = new ApolloServer({
 
       const decoded = JSONWebToken.verifyToken(token);
   
-      if (!decoded) throw null;
+      if (!decoded) throw new AuthenticationError('You must login first');
       
       // ! try to retrieve a user with the token
-      const user = await UserController.login(decoded);
+      const user = await UserController.find(decoded.id);
 
-      if (!user) throw new AuthenticationError('Invalid email or password');
+      if (!user) throw new AuthenticationError('You must login first');
       
       // ! add the user to the context
       return { user };
