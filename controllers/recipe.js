@@ -1,6 +1,9 @@
 const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/');
 const { Op } = require('sequelize');
-const { gql, ForbiddenError } = require('apollo-server')
+const { gql, ForbiddenError } = require('apollo-server');
+const { extname } = require('path');
+const { v4: uuid } = require('uuid');
+const s3 = require('../config/aws');
 
 
 const typeDefs = gql`
@@ -27,7 +30,7 @@ const typeDefs = gql`
     input NewRecipe {
       title: String!
       description: String!
-      image: String!
+      image: Upload!
       ingredients: [String!]
       step: [String!]
       serving: Int!
@@ -86,6 +89,13 @@ const resolvers = {
     addRecipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
       const { id } = context.user;
+      const { createReadStream, filename, mimetype } = args.recipe.image;
+      const { Location } = await s3.upload({
+        Body: createReadStream(),
+        Key: `${uuid()}${extname(filename)}`,
+        ContentType: mimetype
+      }).promise();
+      args.recipe.image = Location;
       const data = await Recipe.create(args.recipe);
       const dataUserRecipe = {
         UserId: id,
@@ -129,6 +139,15 @@ const resolvers = {
       if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
 
       if(!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
+
+      const { createReadStream, filename, mimetype } = args.recipe.image;
+      const { Location } = await s3.upload({
+        Body: createReadStream(),
+        Key: `${uuid()}${extname(filename)}`,
+        ContentType: mimetype
+      }).promise();
+
+      args.recipe.image = Location;
 
       const data = await Recipe.update(args.recipe, {
         where: { id: args.id },
