@@ -3,6 +3,7 @@ const { ApolloServer, gql, makeExecutableSchema, AuthenticationError } = require
 const UserController = require('./controllers/user');
 const JSONWebToken = require('./helpers/jwt');
 const userSchema = require('./schema/userSchema');
+const userRecipeSchema = require('./schema/userRecipeSchema');
 const { RecipeController } = require('./controllers')
 
 const typeDefs = gql`
@@ -14,11 +15,13 @@ const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
     RecipeController.typeDefs,
-    userSchema.typeDefs
+    userSchema.typeDefs,
+    userRecipeSchema.typeDefs
   ],
   resolvers: [
     RecipeController.resolvers,
-    userSchema.resolvers
+    userSchema.resolvers,
+    userRecipeSchema.resolvers
   ]
 })
 
