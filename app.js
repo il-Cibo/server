@@ -51,10 +51,24 @@ const server = new ApolloServer({
   }
 });
 
+const serverTest = (token) => new ApolloServer({
+  schema,
+  context: async () => {
+    const decoded = JSONWebToken.verifyToken(token);
+    if (!decoded) throw new AuthenticationError('Invalid username or password');
+    const user = await UserController.find(decoded.id);
+    if (!user) throw new AuthenticationError('Invalid username or password');
+    return { user };
+  }
+});
+
 // if (process.env.NODE_ENV !== 'test') {
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });
 // }
 
-module.exports = server
+module.exports = {
+  server,
+  serverTest
+}

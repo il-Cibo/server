@@ -1,12 +1,15 @@
 const { createTestClient } = require('apollo-server-testing');
-const { gql } = require('apollo-server')
+const { ApolloServer, gql } = require('apollo-server')
 const fs = require('fs')
-const server = require('../app')
-const { query, mutate } = createTestClient(server);
+const { serverTest } = require('../app')
+// const createTestServer = () => {
+//   return server
+// }
+// const { query, mutate } = createTestClient(server);
 const { User } = require('../models/');
 const { UserController } = require('../controllers');
 
-let userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNjA3ODUxMzM1fQ.INb1XhvAp3Y5GFb8iQJNZUa69fG1k_WbKrf7sWEEYtQ'
+let userToken = ''
 
 beforeAll(async () => {
   const create = await User.create({
@@ -22,7 +25,6 @@ beforeAll(async () => {
     username: 'test',
     password: 'test123'
   })
-  console.log(token)
   userToken = token
 })
 
@@ -130,14 +132,7 @@ describe('create recipe test', () => {
 
   test('create recipe success', async () => {
 
-    server.context = () => {
-      const req = {
-        headers: {
-          "token": userToken
-        }
-      }
-      return { req }
-    };
+    const { query, mutate } = createTestClient(serverTest(userToken));
 
     const filename = './tests/download.jpeg';
     const file = fs.createReadStream(filename)

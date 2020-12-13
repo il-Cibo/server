@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/16</span>
+                <span class='fraction'>12/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.67% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">28.57% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/14</span>
+                <span class='fraction'>12/14</span>
             </div>
         
             
@@ -55,7 +55,7 @@
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
         </p>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -112,28 +112,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -154,29 +154,29 @@ class UserController {
 <span class="cstat-no" title="statement not covered" >    return newUser;      </span>
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  st</span>atic async login(userPayload) {
-    const { username, password } = <span class="cstat-no" title="statement not covered" >userPayload;</span>
+  static async login(userPayload) {
+    const { username, password } = userPayload;
 &nbsp;
-    const user = <span class="cstat-no" title="statement not covered" >await User.findOne({</span>
+    const user = await User.findOne({
       where: {
         username
       }
     });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    if (!user) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError ('Invalid email or password');</span></span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError ('Invalid email or password');</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    if (!Bcrypt.comparePassword(password, user.password)) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError ('Invalid email or password');</span></span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!Bcrypt.comparePassword(password, user.password)) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError ('Invalid email or password');</span>
     
-    const tokenPayload = <span class="cstat-no" title="statement not covered" >{</span>
+    const tokenPayload = {
       id: user.id,
       username: user.username
     }
-    const token = <span class="cstat-no" title="statement not covered" >JSONWebToken.signToken(tokenPayload);</span>
-<span class="cstat-no" title="statement not covered" >    return { token };</span>
+    const token = JSONWebToken.signToken(tokenPayload);
+    return { token };
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  st</span>atic async find(id) {
-<span class="cstat-no" title="statement not covered" >    return await User.findByPk(id, {</span>
+  static async find(id) {
+    return await User.findByPk(id, {
       include: {
         model: Recipe,
         include: Tag
@@ -193,7 +193,7 @@ module.exports = UserController</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Dec 13 2020 16:45:54 GMT+0700 (Western Indonesia Time)
+                at Sun Dec 13 2020 17:29:31 GMT+0700 (Western Indonesia Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>
