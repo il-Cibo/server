@@ -142,7 +142,7 @@ const resolvers = {
 
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
 
-      const { createReadStream, filename, mimetype } = args.recipe.image;
+      const { createReadStream, filename, mimetype } = await args.recipe.image;
       const { Location } = await s3.upload({
         Body: createReadStream(),
         Key: `${uuid()}${extname(filename)}`,
