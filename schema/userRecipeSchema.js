@@ -1,6 +1,6 @@
 const { Recipe, UserRecipe, sequelize, Tag } = require('../models');
 const { gql } = require('apollo-server');
-const { context } = require('../app');
+const { Op } = require('sequelize');
 
 const typeDefs = gql`
   type UserRecipe {
@@ -11,7 +11,8 @@ const typeDefs = gql`
   }
 
   extend type Query {
-    findFav: User 
+    findFav: User
+    findPlan: User 
   }
 
   extend type Mutation {
@@ -41,6 +42,24 @@ const resolvers = {
           include: Tag
         }
       })
+
+      return result;
+    },
+    findPlan: async (parent, args, context) => {
+      if (!context.user) throw new AuthenticationError("Please login first");
+
+      const { user } = context;
+      const result = User.findByPk(user.id, {
+        include: {
+          model: Recipe,
+          through: {
+            model: UserRecipe,
+            where: [
+              sequelize.where(sequelize.fn('array_length', sequelize.col('plan'), 1), {[Op.ne]: 0})
+            ]
+          }
+        }
+      });
 
       return result;
     }

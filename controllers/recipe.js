@@ -36,6 +36,7 @@ const typeDefs = gql`
       serving: Int!
       time: Int!
     }
+    
     extend type Query {
       recipe(id: Int!): Recipe
       recipes: [Recipe]
