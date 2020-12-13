@@ -1,10 +1,9 @@
 require('dotenv').config()
 const { ApolloServer, gql, makeExecutableSchema, AuthenticationError, GraphQLUpload } = require('apollo-server');
-const UserController = require('./controllers/user');
-const JSONWebToken = require('./helpers/jwt');
-const userSchema = require('./schema/userSchema');
-const userRecipeSchema = require('./schema/userRecipeSchema');
-const recipeSchema = require('./schema/recipeSchema')
+const { JSONWebToken } = require('./helpers');
+const { User, Recipe, Tag } = require('./models');
+const appSchema = require('./schema');
+
 
 const typeDefs = gql`
   type Query
@@ -15,15 +14,11 @@ const typeDefs = gql`
 const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
-    recipeSchema.typeDefs,
-    userSchema.typeDefs,
-    userRecipeSchema.typeDefs
+    ...appSchema.typeDefs
   ],
   resolvers: [
     { Upload: GraphQLUpload },
-    recipeSchema.resolvers,
-    userSchema.resolvers,
-    userRecipeSchema.resolvers
+    ...appSchema.resolvers
   ]
 })
 
@@ -42,7 +37,12 @@ const server = new ApolloServer({
     if (!decoded) throw new AuthenticationError('Invalid username or password');
 
     // ! try to retrieve a user with the token
-    const user = await UserController.find(decoded.id);
+    const user = await User.findByPk(decoded.id, {
+      include: {
+        model: Recipe,
+        include: Tag
+      }
+    });
 
     if (!user) throw new AuthenticationError('Invalid username or password');
 
@@ -56,17 +56,22 @@ const serverTest = (token) => new ApolloServer({
   context: async () => {
     const decoded = JSONWebToken.verifyToken(token);
     if (!decoded) throw new AuthenticationError('Invalid username or password');
-    const user = await UserController.find(decoded.id);
+    const user = await User.findByPk(decoded.id, {
+      include: {
+        model: Recipe,
+        include: Tag
+      }
+    });
     if (!user) throw new AuthenticationError('Invalid username or password');
     return { user };
   }
 });
 
-// if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test') {
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });
-// }
+}
 
 module.exports = {
   server,
