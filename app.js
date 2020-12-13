@@ -9,7 +9,7 @@ const { RecipeController } = require('./controllers')
 const typeDefs = gql`
   type Query
   type Mutation
-  scalarUpload
+  scalar Upload
 `
 
 const schema = makeExecutableSchema({
