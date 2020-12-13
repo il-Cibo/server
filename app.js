@@ -25,7 +25,6 @@ const schema = makeExecutableSchema({
 const server = new ApolloServer({
   schema,
   context: async ({ req }) => {
-    console.log(req)
     // ! get the user token from the headers
     const token = req.headers.token || '';
 

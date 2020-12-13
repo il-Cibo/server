@@ -68,7 +68,7 @@ const resolvers = {
           plan: [],
           creation: true
         };
-        const userRecipe = await UserRecipe.create(dataUserRecipe);
+        await UserRecipe.create(dataUserRecipe);
         const { tags } = args;
         for (i in tags) {
           let newTag = await Tag.findOrCreate({

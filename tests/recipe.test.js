@@ -2,34 +2,155 @@ const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
 const server = require('../app')
 const { query, mutate } = createTestClient(server);
-server.context = () => {
-  const req = {
-    headers: {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhc2QiLCJpYXQiOjE2MDc3NjA2Njl9.GbGpRpJDyKQKDRvAvsGHhNwyvAEQe82NSpnJ-G9n_nc"
-    }
-  }
-  return { req }
-};
-// const { Recipe } = require('../models/');
 
-// beforeAll(() => {
-//   Recipe.create({
-//     title: 'test'
+const { User } = require('../models/');
+const { UserController } = require('../controllers');
+
+let userToken = ''
+
+beforeAll(async () => {
+  const create = await User.create({
+    username: 'test',
+    email: 'test@test.com',
+    password: 'test123',
+    gender: 'test',
+    name: 'test',
+    avatar: 'test'
+  }, { returning: true })
+
+  const { token } = await UserController.login({
+    username: 'test',
+    password: 'test123'
+  })
+
+  userToken = token
+})
+
+// afterAll(async () => {
+//   await Recipe.destroy({ where: { id: 1 } })
+// })
+
+// describe('fetch all recipe test', () => {
+
+//   test('fetch all recipe success', async () => {
+
+//     server.context = () => {
+//       const req = {
+//         headers: {
+//           "token": userToken
+//         }
+//       }
+//       return { req }
+//     };
+
+//     console.log(userToken)
+
+//     const test = await query({
+//       query: gql`
+//         query {
+//           recipes {
+//             id
+//             title
+//             description
+//             image
+//             ingredients
+//             step
+//             serving
+//             time
+//           }
+//         }`
+//     })
+//     console.log(test)
+//     expect(test).toHaveProperty('id')
+//   });
+
+//   test('fetch all recipe error, token undefined', async () => {
+
+//     server.context = () => {
+//       const req = {
+//         headers: {
+//           "token": undefined
+//         }
+//       }
+//       return { req }
+//     };
+
+//     const test = await query({
+//       query: gql`
+//         query {
+//           recipes {
+//             id
+//             title
+//             description
+//             image
+//             ingredients
+//             step
+//             serving
+//             time
+//           }
+//         }`
+//     })
+//     // console.log(test)
 //   })
 // })
 
-// afterAll(() => {
-//   Recipe.destroy({ where: { id: 1 } }).then(console.log)
+// describe('fetch one recipe test', () => {
+
+//   test('fetch one recipe success', async () => {
+
+//     server.context = () => {
+//       const req = {
+//         headers: {
+//           "token": userToken
+//         }
+//       }
+//       return { req }
+//     };
+
+//     const test = await query({
+//       query: gql`
+//       query {
+//         recipe(id:1) {
+//           id
+//           title
+//           description
+//           image
+//           ingredients
+//           step
+//           serving
+//           time
+//         }
+//       }`
+//     })
+//     expect(test).toHaveProperty('id')
+//   });
 // })
 
-//stack isEmail
+describe('create recipe test', () => {
 
-test('fetch all recipe success', async () => {
+  test('create recipe success', async () => {
 
-  const test = await query({
-    query: gql`
-      query {
-        recipes {
+    server.context = () => {
+      const req = {
+        headers: {
+          "token": userToken
+        }
+      }
+      return { req }
+    };
+
+    const test = await mutate({
+      mutation: gql`
+      mutation {
+        addRecipe(recipe: {
+          title: "asd"
+          description: "asd"
+          image: "asd"
+          ingredients: ["asd"]
+          step: ["asd"]
+          serving: 123
+          time: 123
+        }, tags: ["asd"]) {
           id
           title
           description
@@ -40,99 +161,75 @@ test('fetch all recipe success', async () => {
           time
         }
       }`
+    })
+    console.log(test)
+    expect(test).toHaveProperty('id')
   })
-  console.log(test.data)
-});
-
-
-test('fetch one recipe success', async () => {
-
-  const test = await query({
-    query: gql`
-    query {
-      recipe(id:1) {
-        id
-        title
-        description
-        image
-        ingredients
-        step
-        serving
-        time
-      }
-    }`
-  })
-  console.log(test.data)
-});
-
-test('create recipe success', async () => {
-
-  const test = await mutate({
-    mutation: gql`
-    mutation {
-      addRecipe(recipe: {
-        title: "asd"
-        description: "asd"
-        image: "asd"
-        ingredients: ["asd"]
-        step: ["asd"]
-        serving: 123
-        time: 123
-      }) {
-        id
-        title
-        description
-        image
-        ingredients
-        step
-        serving
-        time
-      }
-    }`
-  })
-
-  console.log(test)
 })
 
-test('edit recipe success', async () => {
+// describe('edit recipe test', () => {
 
-  const test = await mutate({
-    mutation: gql`
-    mutation {
-      editRecipe(id: 1, recipe: {
-        title: "edit"
-        description: "edit"
-        image: "edit"
-        ingredients: ["edit"]
-        step: ["edit"]
-        serving: 123
-        time: 123
-      }) {
-        id
-        title
-        description
-        image
-        ingredients
-        step
-        serving
-        time
-      }
-    }`
-  })
+//   test('edit recipe success', async () => {
 
-  console.log(test)
-})
+//     server.context = () => {
+//       const req = {
+//         headers: {
+//           "token": userToken
+//         }
+//       }
+//       return { req }
+//     };
 
-test('create recipe success', async () => {
+//     const test = await mutate({
+//       mutation: gql`
+//       mutation {
+//         editRecipe(id: 1, recipe: {
+//           title: "edit"
+//           description: "edit"
+//           image: "edit"
+//           ingredients: ["edit"]
+//           step: ["edit"]
+//           serving: 123
+//           time: 123
+//         }) {
+//           id
+//           title
+//           description
+//           image
+//           ingredients
+//           step
+//           serving
+//           time
+//         }
+//       }`
+//     })
 
-  const test = await mutate({
-    mutation: gql`
-    mutation {
-      deleteRecipe(id: 1) {
-        message
-      }
-    }`
-  })
+//     expect(test).toHaveProperty('id')
+//   })
+// })
 
-  console.log(test)
-})
+// describe('delete recipe test', () => {
+
+//   test('delete recipe success', async () => {
+
+//     server.context = () => {
+//       const req = {
+//         headers: {
+//           "token": userToken
+//         }
+//       }
+//       return { req }
+//     };
+
+//     const test = await mutate({
+//       mutation: gql`
+//       mutation {
+//         deleteRecipe(id: 1) {
+//           message
+//         }
+//       }`
+//     })
+
+//     expect(test).toHaveProperty('message')
+//   })
+// })
