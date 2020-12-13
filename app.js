@@ -1,24 +1,29 @@
 require('dotenv').config()
-const { ApolloServer, gql, makeExecutableSchema, AuthenticationError } = require('apollo-server');
+const { ApolloServer, gql, makeExecutableSchema, AuthenticationError, GraphQLUpload } = require('apollo-server');
 const UserController = require('./controllers/user');
 const JSONWebToken = require('./helpers/jwt');
 const userSchema = require('./schema/userSchema');
+const userRecipeSchema = require('./schema/userRecipeSchema');
 const { RecipeController } = require('./controllers')
 
 const typeDefs = gql`
   type Query
   type Mutation
+  scalar Upload
 `
 
 const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
     RecipeController.typeDefs,
-    userSchema.typeDefs
+    userSchema.typeDefs,
+    userRecipeSchema.typeDefs
   ],
   resolvers: [
+    { Upload: GraphQLUpload },
     RecipeController.resolvers,
-    userSchema.resolvers
+    userSchema.resolvers,
+    userRecipeSchema.resolvers
   ]
 })
 
@@ -46,10 +51,10 @@ const server = new ApolloServer({
   }
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  server.listen().then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-  });
-}
+// if (process.env.NODE_ENV !== 'test') {
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
+// }
 
 module.exports = server

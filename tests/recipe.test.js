@@ -1,12 +1,12 @@
 const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
+const fs = require('fs')
 const server = require('../app')
 const { query, mutate } = createTestClient(server);
-
 const { User } = require('../models/');
 const { UserController } = require('../controllers');
 
-let userToken = ''
+let userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNjA3ODUxMzM1fQ.INb1XhvAp3Y5GFb8iQJNZUa69fG1k_WbKrf7sWEEYtQ'
 
 beforeAll(async () => {
   const create = await User.create({
@@ -22,7 +22,7 @@ beforeAll(async () => {
     username: 'test',
     password: 'test123'
   })
-
+  console.log(token)
   userToken = token
 })
 
@@ -139,18 +139,12 @@ describe('create recipe test', () => {
       return { req }
     };
 
-    const test = await mutate({
-      mutation: gql`
-      mutation {
-        addRecipe(recipe: {
-          title: "asd"
-          description: "asd"
-          image: "asd"
-          ingredients: ["asd"]
-          step: ["asd"]
-          serving: 123
-          time: 123
-        }, tags: ["asd"]) {
+    const filename = './tests/download.jpeg';
+    const file = fs.createReadStream(filename)
+
+    const MUTATION = `
+      mutation createRecipe($recipe: NewRecipe, $tags: [String!]) {
+        addRecipe(recipe: $recipe, tags: $tags) {
           id
           title
           description
@@ -161,6 +155,26 @@ describe('create recipe test', () => {
           time
         }
       }`
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        recipe: {
+          title: "asd",
+          description: "asd",
+          image: new Promise(resolve => resolve({
+            filename,
+            createReadStream: () => file,
+            stream: file,
+            mimetype: `image/jpeg`
+          })),
+          ingredients: "asd",
+          step: "asd",
+          serving: 3,
+          time: 3
+        },
+        tags: ["asd", "asdf"]
+      }
     })
     console.log(test)
     expect(test).toHaveProperty('id')
