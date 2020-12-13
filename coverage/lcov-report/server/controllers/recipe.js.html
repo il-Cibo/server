@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.84% </span>
+                <span class="strong">36.23% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>13/69</span>
+                <span class='fraction'>25/69</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">22.03% </span>
+                <span class="strong">42.37% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/59</span>
+                <span class='fraction'>25/59</span>
             </div>
         
             
@@ -357,34 +357,34 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -552,40 +552,40 @@ const resolvers = {
     addRecipe: async (_, args, context) =&gt; {
       <span class="missing-if-branch" title="if path not taken" >I</span>if (!context.user) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError("Please login first");</span>
       const { id } = context.user;
-      const { createReadStream, filename, mimetype } = args.recipe.image;
+      const { createReadStream, filename, mimetype } = await args.recipe.image;
       const { Location } = await s3.upload({
         Body: createReadStream(),
         Key: `${uuid()}${extname(filename)}`,
         ContentType: mimetype
       }).promise();
-<span class="cstat-no" title="statement not covered" >      args.recipe.image = Location;</span>
-      const data = <span class="cstat-no" title="statement not covered" >await Recipe.create(args.recipe);</span>
-      const dataUserRecipe = <span class="cstat-no" title="statement not covered" >{</span>
+      args.recipe.image = Location;
+      const data = await Recipe.create(args.recipe);
+      const dataUserRecipe = {
         UserId: id,
         RecipeId: data.id,
         favorites: false,
         plan: [],
         creation: true
       };
-      const userRecipe = <span class="cstat-no" title="statement not covered" >await UserRecipe.create(dataUserRecipe);</span>
-      const { tags } = <span class="cstat-no" title="statement not covered" >args;</span>
-<span class="cstat-no" title="statement not covered" >      for (i in tags) {</span>
-        let newTag = <span class="cstat-no" title="statement not covered" >await Tag.findOrCreate({</span>
+      const userRecipe = await UserRecipe.create(dataUserRecipe);
+      const { tags } = args;
+      for (i in tags) {
+        let newTag = await Tag.findOrCreate({
           where: {
             name: tags[i].trim().toLowerCase()
           }
         });
-        let newPayload = <span class="cstat-no" title="statement not covered" >{</span>
+        let newPayload = {
           RecipeId: data.id,
           TagId: newTag[0].id
         };
-<span class="cstat-no" title="statement not covered" >        await RecipeTag.create(newPayload);</span>
+        await RecipeTag.create(newPayload);
       }
-      const result = <span class="cstat-no" title="statement not covered" >await Recipe.findByPk(data.id, {</span>
+      const result = await Recipe.findByPk(data.id, {
         include: Tag
       })
-<span class="cstat-no" title="statement not covered" >      console.log(result)</span>
-<span class="cstat-no" title="statement not covered" >      return result;</span>
+      console.log(result)
+      return result;
     },
     editRecipe: <span class="fstat-no" title="function not covered" >as</span>ync (_, args, context) =&gt; {
 <span class="cstat-no" title="statement not covered" >      if (!context.user) <span class="cstat-no" title="statement not covered" >throw new AuthenticationError("Please login first");</span></span>
@@ -667,7 +667,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Dec 13 2020 17:29:31 GMT+0700 (Western Indonesia Time)
+                at Sun Dec 13 2020 17:57:54 GMT+0700 (Indochina Time)
             </div>
         </div>
         <script src="../../prettify.js"></script>

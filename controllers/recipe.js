@@ -91,7 +91,7 @@ const resolvers = {
     addRecipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
       const { id } = context.user;
-      const { createReadStream, filename, mimetype } = args.recipe.image;
+      const { createReadStream, filename, mimetype } = await args.recipe.image;
       const { Location } = await s3.upload({
         Body: createReadStream(),
         Key: `${uuid()}${extname(filename)}`,
