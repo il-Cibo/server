@@ -4,7 +4,7 @@ const UserController = require('./controllers/user');
 const JSONWebToken = require('./helpers/jwt');
 const userSchema = require('./schema/userSchema');
 const userRecipeSchema = require('./schema/userRecipeSchema');
-const { RecipeController } = require('./controllers')
+const recipeSchema = require('./schema/recipeSchema')
 
 const typeDefs = gql`
   type Query
@@ -15,13 +15,13 @@ const typeDefs = gql`
 const schema = makeExecutableSchema({
   typeDefs: [
     typeDefs,
-    RecipeController.typeDefs,
+    recipeSchema.typeDefs,
     userSchema.typeDefs,
     userRecipeSchema.typeDefs
   ],
   resolvers: [
     { Upload: GraphQLUpload },
-    RecipeController.resolvers,
+    recipeSchema.resolvers,
     userSchema.resolvers,
     userRecipeSchema.resolvers
   ]
