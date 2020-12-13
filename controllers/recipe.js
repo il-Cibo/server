@@ -1,6 +1,6 @@
 const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/');
 const { Op } = require('sequelize');
-const { gql, ForbiddenError } = require('apollo-server');
+const { gql, ForbiddenError, AuthenticationError } = require('apollo-server');
 const { extname } = require('path');
 const { v4: uuid } = require('uuid');
 const s3 = require('../config/aws');
@@ -140,7 +140,7 @@ const resolvers = {
 
       if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
 
-      if(!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
+      if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
 
       const { createReadStream, filename, mimetype } = args.recipe.image;
       const { Location } = await s3.upload({
@@ -188,7 +188,7 @@ const resolvers = {
 
       if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
 
-      if(!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
+      if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
       await Recipe.destroy({ where: { id: args.id } });
       await RecipeTag.destroy({ where: { RecipeId: args.id } })
       return { message: "Recipe has been deleted" };
