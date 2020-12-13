@@ -2,14 +2,12 @@ const { createTestClient } = require('apollo-server-testing');
 const { ApolloServer, gql } = require('apollo-server')
 const fs = require('fs')
 const { serverTest } = require('../app')
-// const createTestServer = () => {
-//   return server
-// }
-// const { query, mutate } = createTestClient(server);
 const { User } = require('../models/');
 const { UserController } = require('../controllers');
+const { resolve } = require('path');
 
 let userToken = ''
+let UserId;
 
 beforeAll(async () => {
   const create = await User.create({
@@ -21,11 +19,21 @@ beforeAll(async () => {
     avatar: 'test'
   }, { returning: true })
 
+  UserId = create.id;
+
   const { token } = await UserController.login({
     username: 'test',
     password: 'test123'
   })
   userToken = token
+})
+
+afterAll(async () => {
+  await User.destroy({
+    where: {
+      id: UserId
+    }
+  })
 })
 
 // afterAll(async () => {
@@ -135,7 +143,7 @@ describe('create recipe test', () => {
     const { query, mutate } = createTestClient(serverTest(userToken));
 
     const filename = './tests/download.jpeg';
-    const file = fs.createReadStream(filename)
+    const file = fs.createReadStream(resolve(filename))
 
     const MUTATION = `
       mutation createRecipe($recipe: NewRecipe, $tags: [String!]) {
@@ -171,8 +179,7 @@ describe('create recipe test', () => {
         tags: ["asd", "asdf"]
       }
     })
-    console.log(test)
-    expect(test).toHaveProperty('id')
+    expect(test.data).toHaveProperty('id')
   })
 })
 
