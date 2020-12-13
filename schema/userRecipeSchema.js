@@ -1,5 +1,5 @@
-const { Recipe, UserRecipe, sequelize, Tag } = require('../models');
-const { gql } = require('apollo-server');
+const { Recipe, UserRecipe, sequelize, Tag, User } = require('../models');
+const { gql, AuthenticationError } = require('apollo-server');
 const { Op } = require('sequelize');
 
 const typeDefs = gql`

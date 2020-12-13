@@ -1,10 +1,9 @@
 const { createTestClient } = require('apollo-server-testing');
-const { ApolloServer, gql } = require('apollo-server')
 const fs = require('fs')
 const { serverTest } = require('../app')
 const { User } = require('../models/');
-const { UserController } = require('../controllers');
 const { resolve } = require('path');
+const { JSONWebToken } = require('../helpers');
 
 let userToken = ''
 let UserId;
@@ -21,10 +20,12 @@ beforeAll(async () => {
 
   UserId = create.id;
 
-  const { token } = await UserController.login({
-    username: 'test',
-    password: 'test123'
-  })
+  const tokenPayload = {
+    id: create.id,
+    username: create.username
+  }
+  const token = JSONWebToken.signToken(tokenPayload);
+
   userToken = token
 })
 
@@ -179,7 +180,7 @@ describe('create recipe test', () => {
         tags: ["asd", "asdf"]
       }
     })
-    expect(test.data).toHaveProperty('id')
+    expect(test.data.addRecipe).toHaveProperty('id')
   })
 })
 

@@ -122,7 +122,7 @@ const resolvers = {
       const result = await Recipe.findByPk(data.id, {
         include: Tag
       })
-      console.log(result)
+      // console.log(result)
       return result;
     },
     editRecipe: async (_, args, context) => {
