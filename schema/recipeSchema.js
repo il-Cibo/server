@@ -1,4 +1,4 @@
-const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models/');
+const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models');
 const { Op } = require('sequelize');
 const { gql, ForbiddenError, AuthenticationError } = require('apollo-server');
 const { extname } = require('path');
@@ -57,7 +57,6 @@ const resolvers = {
       return data
     },
     recipes: async (parent, args, context) => {
-      // console.log(context, '<<<<<<<<<<<<<<<< server')
       if (!context.user) throw new AuthenticationError("Please login first");
       const data = await Recipe.findAll({ include: { model: Tag } })
       return data
@@ -106,7 +105,7 @@ const resolvers = {
         plan: [],
         creation: true
       };
-      const userRecipe = await UserRecipe.create(dataUserRecipe);
+      await UserRecipe.create(dataUserRecipe);
       const { tags } = args;
       for (i in tags) {
         let newTag = await Tag.findOrCreate({
