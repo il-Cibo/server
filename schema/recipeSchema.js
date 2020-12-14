@@ -95,9 +95,10 @@ const resolvers = {
       if (!context.user) throw new AuthenticationError("Please login first");
       const { id } = context.user;
       const { createReadStream, filename, mimetype } = await args.recipe.image;
+      let coba = `${uuid()}${extname(filename)}`
       const { Location } = await s3.upload({
         Body: createReadStream(),
-        Key: `${uuid()}${extname(filename)}`,
+        Key: coba,
         ContentType: mimetype
       }).promise();
       args.recipe.image = Location;
@@ -126,7 +127,6 @@ const resolvers = {
       const result = await Recipe.findByPk(data.id, {
         include: Tag
       })
-      // console.log(result, "ini di recipe schemaaaaaaaaaaaaaaaaaaaaaaa")
       return result;
     },
     editRecipe: async (_, args, context) => {
@@ -145,10 +145,13 @@ const resolvers = {
 
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
 
+      const findRecipe = await Recipe.findByPk(args.id)
+      const key = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
       const { createReadStream, filename, mimetype } = await args.recipe.image;
+      const coba = `${key}${extname(filename)}`
       const { Location } = await s3.upload({
         Body: createReadStream(),
-        Key: `${uuid()}${extname(filename)}`,
+        Key: coba,
         ContentType: mimetype
       }).promise();
 
