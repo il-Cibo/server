@@ -267,7 +267,7 @@ describe('fetch user data test', () => {
       }`
     })
 
-    console.log(test)
+    console.log(test, '<<<<<<<<<<<<<<<< MAIN PROBLEM')
   })
 })
 

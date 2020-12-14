@@ -8,8 +8,12 @@ class JSONWebToken {
   }
 
   static verifyToken(token) {
-    const decoded = jwt.verify(token, 'il-cibo')
-    return decoded
+    try {
+      const decoded = jwt.verify(token, 'il-cibo')
+      return decoded
+    } catch (err) {
+      return null
+    }
   }
 }
 
