@@ -86,8 +86,8 @@ module.exports = (sequelize, DataTypes) => {
           args: true,
           msg: 'serving only allow number'
         },
-        isAfter: {
-          args: [0],
+        min: {
+          args: 1,
           msg: 'cannot serve less than 1'
         }
       }
@@ -104,8 +104,8 @@ module.exports = (sequelize, DataTypes) => {
           args: true,
           msg: 'time only allow number'
         },
-        isAfter: {
-          args: [0],
+        min: {
+          args: 1,
           msg: 'cannot input time less than 1'
         }
       }

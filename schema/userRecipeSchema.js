@@ -55,7 +55,7 @@ const resolvers = {
           through: {
             model: UserRecipe,
             where: [
-              sequelize.where(sequelize.fn('array_length', sequelize.col('plan'), 1), {[Op.ne]: 0})
+              sequelize.where(sequelize.fn('array_length', sequelize.col('plan'), 1), { [Op.ne]: 0 })
             ]
           }
         }
@@ -71,14 +71,14 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId } = args;
 
-      const [ recipe ] = await UserRecipe.upsert({
+      const [recipe] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
         favorites: true
       });
 
       return recipe;
-      
+
     },
 
     deleteFav: async (parent, args, context) => {
@@ -87,7 +87,7 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId } = args;
 
-      const [ recipe ] = await UserRecipe.upsert({
+      const [recipe] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
         favorites: false
@@ -102,7 +102,7 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId, plan } = args;
 
-      const [ result ] = await UserRecipe.upsert({
+      const [result] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
         plan: sequelize.fn('array_append', sequelize.col('plan') ? sequelize.col('plan') : [], plan)
@@ -129,7 +129,7 @@ const resolvers = {
 
       return result[1][0];
     }
-  } 
+  }
 }
 
 module.exports = {

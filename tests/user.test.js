@@ -1,28 +1,15 @@
 const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
-const fs = require('fs')
-const { serverTest, server } = require('../app')
-const { resolve } = require('path');
+const { server } = require('../app')
 const { User } = require('../models/');
 
 let userToken
 let UserId
 
-beforeAll(() => {
-  server.context = () => {
-    const req = {
-      headers: {
-        "token": ''
-      }
-    }
-    return { req }
-  };
-})
-
 describe('user register test', () => {
 
-  test('user register success', async () => {
-    const { mutate } = createTestClient(server)
+  test('user register success', async (done) => {
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -51,10 +38,11 @@ describe('user register test', () => {
       name: "usertest",
       avatar: "usertest"
     })
+    done()
   })
 
-  test('user register error, input empty', async () => {
-    const { mutate } = createTestClient(server)
+  test('user register error, input empty', async (done) => {
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -76,18 +64,12 @@ describe('user register test', () => {
       }`
     })
 
-    console.log(test)
-    // expect(test.data.register).toEqual({
-    //   username: "usertest",
-    //   email: "usertest@test.com",
-    //   gender: "test",
-    //   name: "usertest",
-    //   avatar: "usertest"
-    // })
+    expect(test.errors).toEqual(expect.any(Array))
+    done()
   })
 
-  test('user register error, wrong data type', async () => {
-    const { mutate } = createTestClient(server)
+  test('user register error, wrong data type', async (done) => {
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -110,13 +92,14 @@ describe('user register test', () => {
     })
 
     expect(test.errors).toEqual(expect.any(Array))
+    done()
   })
 })
 
 describe('user login test', () => {
 
-  test('user login success', async () => {
-    const { query } = createTestClient(server)
+  test('user login success', async (done) => {
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -131,13 +114,13 @@ describe('user login test', () => {
     })
 
     userToken = test.data.login.token
-    console.log(userToken, test.data.login.token)
 
     expect(test.data.login).toEqual({ token: expect.any(String) })
+    done()
   })
 
-  test('user login error, input empty', async () => {
-    const { query } = createTestClient(server)
+  test('user login error, input empty', async (done) => {
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -151,11 +134,12 @@ describe('user login test', () => {
       }`
     })
 
-    console.log(test)
+    expect(test.errors).toEqual(expect.any(Array))
+    done()
   })
 
-  test('user login error, wrong data type', async () => {
-    const { query } = createTestClient(server)
+  test('user login error, wrong data type', async (done) => {
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -170,13 +154,14 @@ describe('user login test', () => {
     })
 
     expect(test.errors).toEqual(expect.any(Array))
+    done()
   })
 })
 
 describe('fetch user data test', () => {
 
-  test('fetch user data success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken))
+  test('fetch user data success', async (done) => {
+    const { query, mutate } = createTestClient(server(userToken))
 
     const MUTATION = `
       mutation createRecipe($recipe: NewRecipe, $tags: [String!]) {
@@ -235,10 +220,7 @@ describe('fetch user data test', () => {
       }`
     })
 
-
     UserId = test.data.user.id
-
-    console.log(test.data.user.id, UserId)
 
     expect(test.data.user).toEqual({
       id: expect.any(Number),
@@ -249,10 +231,11 @@ describe('fetch user data test', () => {
       avatar: expect.any(String),
       Recipes: expect.any(Array),
     })
+    done()
   })
 
-  test('fetch user data error, token invalid', async () => {
-    const { query } = createTestClient(serverTest())
+  test('fetch user data error, token invalid', async (done) => {
+    const { query } = createTestClient(server('userToken'))
 
     const test = await query({
       query: gql`
@@ -264,12 +247,25 @@ describe('fetch user data test', () => {
           gender
           name
           avatar
-          Recipes
+          Recipes {
+            id
+            title
+            description
+            image
+            ingredients
+            step
+            serving
+            time
+            Tags {
+              name
+            }
+          }
         }
       }`
     })
 
-    console.log(test, '<<<<<<<<<<<<<<<< MAIN PROBLEM')
+    expect(test.errors).toEqual(expect.any(Array))
+    done()
   })
 })
 

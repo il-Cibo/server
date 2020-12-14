@@ -18,14 +18,14 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     username: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
       validate: {
         notEmpty: {
           args: true,
           msg: 'username is required'
         },
-        isNumeric: {
-          args: false,
+        isAlpha: {
+          args: true,
           msg: 'username must contain word'
         }
       }
@@ -58,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        allowNull: {
+        notEmpty: {
           args: true,
           msg: 'gender is required'
         },
@@ -72,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        allowNull: {
+        notEmpty: {
           args: true,
           msg: 'gender is required'
         },
@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        allowNull: {
+        notEmpty: {
           args: true,
           msg: 'gender is required'
         },
