@@ -5,10 +5,11 @@ const { User } = require('../models/');
 const { resolve } = require('path');
 const { JSONWebToken } = require('../helpers');
 
-let userToken = ''
+let userToken;
 let UserId;
+let RecipeId;
 
-beforeAll(async () => {
+beforeAll(async (done) => {
   const create = await User.create({
     username: 'test',
     email: 'test@test.com',
@@ -27,14 +28,16 @@ beforeAll(async () => {
   const token = JSONWebToken.signToken(tokenPayload);
 
   userToken = token
+  done();
 })
 
-afterAll(async () => {
+afterAll(async (done) => {
   await User.destroy({
     where: {
       id: UserId
     }
   })
+  done();
 })
 
 // afterAll(async () => {
@@ -137,11 +140,10 @@ afterAll(async () => {
 //   });
 // })
 
-describe('create recipe test', () => {
+describe('Recipe test', () => {
 
-  test('create recipe success', async () => {
-
-    const { query, mutate } = createTestClient(serverTest(userToken));
+  test('create recipe success', async (done) => {
+    const { mutate } = createTestClient(serverTest(userToken));
 
     const filename = './tests/download.jpeg';
     const file = fs.createReadStream(resolve(filename))
@@ -157,6 +159,7 @@ describe('create recipe test', () => {
           step
           serving
           time
+          Tags { name }
         }
       }`
 
@@ -172,81 +175,338 @@ describe('create recipe test', () => {
             stream: file,
             mimetype: `image/jpeg`
           })),
-          ingredients: "asd",
-          step: "asd",
+          ingredients: ["asd", "asdf"],
+          step: ["asd", "asdf"],
           serving: 3,
           time: 3
         },
         tags: ["asd", "asdf"]
       }
     })
-    expect(test.data.addRecipe).toHaveProperty('id')
+
+    RecipeId = test.data.addRecipe.id;
+
+    expect(test.data.addRecipe).toEqual({
+      id: expect.any(Number),
+      title: "asd",
+      description: "asd",
+      image: expect.any(String),
+      ingredients: ["asd", "asdf"],
+      step: ["asd", "asdf"],
+      serving: 3,
+      time: 3,
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+    })
+    done();
+  })
+
+  test('create recipe failed on authentication', async (done) => {
+    const { mutate } = createTestClient(serverTest());
+
+    const filename = './tests/download.jpeg';
+    const file = fs.createReadStream(resolve(filename))
+
+    const MUTATION = `
+      mutation createRecipe($recipe: NewRecipe, $tags: [String!]) {
+        addRecipe(recipe: $recipe, tags: $tags) {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }`
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        recipe: {
+          title: "asd",
+          description: "asd",
+          image: new Promise(resolve => resolve({
+            filename,
+            createReadStream: () => file,
+            stream: file,
+            mimetype: `image/jpeg`
+          })),
+          ingredients: ["asd", "asdf"],
+          step: ["asd", "asdf"],
+          serving: 3,
+          time: 3
+        },
+        tags: ["asd", "asdf"]
+      }
+    })
+
+    expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
+      message: "Please login first"
+    })]))
+
+    done();
+  })
+
+
+  test('find recipe success', async (done) => {
+    const { query } = createTestClient(serverTest(userToken));
+
+    const QUERY = `
+      query findRecipe($id: Int!) {
+        recipe(id: $id) {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }
+    `
+    const test = await query({
+      query: QUERY,
+      variables: {
+        id: RecipeId
+      }
+    });
+
+    expect(test.data.recipe).toEqual({
+      id: expect.any(Number),
+      title: "asd",
+      description: "asd",
+      image: expect.any(String),
+      ingredients: ["asd", "asdf"],
+      step: ["asd", "asdf"],
+      serving: 3,
+      time: 3,
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+    })
+    done();
+  })
+
+  test('find recipe failed on authentication', async (done) => {
+    const { query } = createTestClient(serverTest());
+
+    const QUERY = `
+      query findRecipe($id: Int!) {
+        recipe(id: $id) {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }
+    `
+    const test = await query({
+      query: QUERY,
+      variables: {
+        id: RecipeId
+      }
+    });
+
+    expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
+      message: "Please login first"
+    })]))
+
+    done();
+  })
+
+  test('find recipes success', async (done) => {
+    const { query } = createTestClient(serverTest(userToken));
+
+    const QUERY = `
+      query findRecipe {
+        recipes {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }
+    `
+    const test = await query({
+      query: QUERY
+    });
+
+    expect(test.data.recipes).toEqual([{
+      id: expect.any(Number),
+      title: "asd",
+      description: "asd",
+      image: expect.any(String),
+      ingredients: ["asd", "asdf"],
+      step: ["asd", "asdf"],
+      serving: 3,
+      time: 3,
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+    }])
+    done();
+  })
+
+  test('find recipes failed on authentication', async (done) => {
+    const { query } = createTestClient(serverTest());
+
+    const QUERY = `
+      query findRecipe {
+        recipes {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }
+    `
+    const test = await query({
+      query: QUERY
+    });
+
+    expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
+      message: "Please login first"
+    })]));
+    
+    done();
+  })
+
+
+  test('query recipes success', async (done) => {
+    const { query } = createTestClient(serverTest(userToken));
+
+    const QUERY = `
+      query findRecipe($query: String!) {
+        queryRecipes(query: $query) {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }
+    `
+    const test = await query({
+      query: QUERY,
+      variables: {
+        query: "asd"
+      }
+    });
+
+    expect(test.data.queryRecipes).toEqual([{
+      id: expect.any(Number),
+      title: "asd",
+      description: "asd",
+      image: expect.any(String),
+      ingredients: ["asd", "asdf"],
+      step: ["asd", "asdf"],
+      serving: 3,
+      time: 3,
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+    }])
+    done();
+  })
+
+  test('edit recipe success', async (done) => {
+    const { mutate } = createTestClient(serverTest(userToken));
+
+    const filename = './tests/download.jpeg';
+    const file = fs.createReadStream(resolve(filename))
+
+    const MUTATION = `
+      mutation editRecipe($id: Int!, $recipe: NewRecipe, $tags: [String!]) {
+        editRecipe(id: $id, recipe: $recipe, tags: $tags) {
+          id
+          title
+          description
+          image
+          ingredients
+          step
+          serving
+          time
+          Tags { name }
+        }
+      }`
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        id: RecipeId,
+        recipe: {
+          title: "asdfgh",
+          description: "asdfgh",
+          image: new Promise(resolve => resolve({
+            filename,
+            createReadStream: () => file,
+            stream: file,
+            mimetype: `image/jpeg`
+          })),
+          ingredients: ["asdfgh", "asdfghj"],
+          step: ["asdfgh", "asdfghj"],
+          serving: 5,
+          time: 5
+        },
+        tags: ["asdfgh", "asdfghj"]
+      }
+    })
+
+    expect(test.data.editRecipe).toEqual({
+      id: RecipeId,
+      title: "asdfgh",
+      description: "asdfgh",
+      image: expect.any(String),
+      ingredients: ["asdfgh", "asdfghj"],
+      step: ["asdfgh", "asdfghj"],
+      serving: 5,
+      time: 5,
+      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String)})])
+    })
+    done();
+  })
+  
+  test('delete recipe success', async (done) => {
+    const { mutate } = createTestClient(serverTest(userToken));
+
+    const MUTATION = `
+      mutation deleteRecipe($id: Int!) {
+        deleteRecipe(id: $id) {
+          message
+        }
+      }
+    `;
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        id: RecipeId
+      }
+    });
+  
+    expect(test.data.deleteRecipe).toEqual({
+      message: "Recipe has been deleted"
+    });
+
+    done();
   })
 })
 
-// describe('edit recipe test', () => {
 
-//   test('edit recipe success', async () => {
-
-//     server.context = () => {
-//       const req = {
-//         headers: {
-//           "token": userToken
-//         }
-//       }
-//       return { req }
-//     };
-
-//     const test = await mutate({
-//       mutation: gql`
-//       mutation {
-//         editRecipe(id: 1, recipe: {
-//           title: "edit"
-//           description: "edit"
-//           image: "edit"
-//           ingredients: ["edit"]
-//           step: ["edit"]
-//           serving: 123
-//           time: 123
-//         }) {
-//           id
-//           title
-//           description
-//           image
-//           ingredients
-//           step
-//           serving
-//           time
-//         }
-//       }`
-//     })
-
-//     expect(test).toHaveProperty('id')
-//   })
-// })
-
-// describe('delete recipe test', () => {
-
-//   test('delete recipe success', async () => {
-
-//     server.context = () => {
-//       const req = {
-//         headers: {
-//           "token": userToken
-//         }
-//       }
-//       return { req }
-//     };
-
-//     const test = await mutate({
-//       mutation: gql`
-//       mutation {
-//         deleteRecipe(id: 1) {
-//           message
-//         }
-//       }`
-//     })
-
-//     expect(test).toHaveProperty('message')
-//   })
-// })
