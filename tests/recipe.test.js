@@ -26,7 +26,6 @@ beforeAll(async (done) => {
     username: create.username
   }
   const token = JSONWebToken.signToken(tokenPayload);
-
   userToken = token
   done();
 })
@@ -195,7 +194,7 @@ describe('Recipe test', () => {
       step: ["asd", "asdf"],
       serving: 3,
       time: 3,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
     })
     done();
   })
@@ -249,7 +248,6 @@ describe('Recipe test', () => {
     done();
   })
 
-
   test('find recipe success', async (done) => {
     const { query } = createTestClient(serverTest(userToken));
 
@@ -284,7 +282,7 @@ describe('Recipe test', () => {
       step: ["asd", "asdf"],
       serving: 3,
       time: 3,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
     })
     done();
   })
@@ -352,7 +350,7 @@ describe('Recipe test', () => {
       step: ["asd", "asdf"],
       serving: 3,
       time: 3,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
     }])
     done();
   })
@@ -382,7 +380,7 @@ describe('Recipe test', () => {
     expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
       message: "Please login first"
     })]));
-    
+
     done();
   })
 
@@ -421,7 +419,7 @@ describe('Recipe test', () => {
       step: ["asd", "asdf"],
       serving: 3,
       time: 3,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd"}), expect.objectContaining({ name: "asdf"})])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
     }])
     done();
   })
@@ -478,11 +476,11 @@ describe('Recipe test', () => {
       step: ["asdfgh", "asdfghj"],
       serving: 5,
       time: 5,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String)})])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) })])
     })
     done();
   })
-  
+
   test('delete recipe success', async (done) => {
     const { mutate } = createTestClient(serverTest(userToken));
 
@@ -500,7 +498,7 @@ describe('Recipe test', () => {
         id: RecipeId
       }
     });
-  
+
     expect(test.data.deleteRecipe).toEqual({
       message: "Recipe has been deleted"
     });
