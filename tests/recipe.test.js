@@ -1,6 +1,6 @@
 const { createTestClient } = require('apollo-server-testing');
 const fs = require('fs')
-const { serverTest } = require('../app')
+const { server } = require('../app')
 const { User } = require('../models/');
 const { resolve } = require('path');
 const { JSONWebToken } = require('../helpers');
@@ -142,7 +142,7 @@ afterAll(async (done) => {
 describe('Recipe test', () => {
 
   test('create recipe success', async (done) => {
-    const { mutate } = createTestClient(serverTest(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const filename = './tests/download.jpeg';
     const file = fs.createReadStream(resolve(filename))
@@ -200,7 +200,7 @@ describe('Recipe test', () => {
   })
 
   test('create recipe failed on authentication', async (done) => {
-    const { mutate } = createTestClient(serverTest());
+    const { mutate } = createTestClient(server());
 
     const filename = './tests/download.jpeg';
     const file = fs.createReadStream(resolve(filename))
@@ -249,7 +249,7 @@ describe('Recipe test', () => {
   })
 
   test('find recipe success', async (done) => {
-    const { query } = createTestClient(serverTest(userToken));
+    const { query } = createTestClient(server(userToken));
 
     const QUERY = `
       query findRecipe($id: Int!) {
@@ -288,7 +288,7 @@ describe('Recipe test', () => {
   })
 
   test('find recipe failed on authentication', async (done) => {
-    const { query } = createTestClient(serverTest());
+    const { query } = createTestClient(server());
 
     const QUERY = `
       query findRecipe($id: Int!) {
@@ -320,7 +320,7 @@ describe('Recipe test', () => {
   })
 
   test('find recipes success', async (done) => {
-    const { query } = createTestClient(serverTest(userToken));
+    const { query } = createTestClient(server(userToken));
 
     const QUERY = `
       query findRecipe {
@@ -341,22 +341,22 @@ describe('Recipe test', () => {
       query: QUERY
     });
 
-    expect(test.data.recipes).toEqual([{
+    expect(test.data.recipes).toEqual(expect.arrayContaining([{
       id: expect.any(Number),
-      title: "asd",
-      description: "asd",
+      title: expect.any(String),
+      description: expect.any(String),
       image: expect.any(String),
-      ingredients: ["asd", "asdf"],
-      step: ["asd", "asdf"],
-      serving: 3,
-      time: 3,
-      Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
-    }])
+      ingredients: expect.arrayContaining([expect.any(String)]),
+      step: expect.arrayContaining([expect.any(String)]),
+      serving: expect.any(Number),
+      time: expect.any(Number),
+      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) }), expect.objectContaining({ name: "asdf" })])
+    }]))
     done();
   })
 
   test('find recipes failed on authentication', async (done) => {
-    const { query } = createTestClient(serverTest());
+    const { query } = createTestClient(server());
 
     const QUERY = `
       query findRecipe {
@@ -386,7 +386,7 @@ describe('Recipe test', () => {
 
 
   test('query recipes success', async (done) => {
-    const { query } = createTestClient(serverTest(userToken));
+    const { query } = createTestClient(server(userToken));
 
     const QUERY = `
       query findRecipe($query: String!) {
@@ -410,7 +410,7 @@ describe('Recipe test', () => {
       }
     });
 
-    expect(test.data.queryRecipes).toEqual([{
+    expect(test.data.queryRecipes).toEqual(expect.arrayContaining([{
       id: expect.any(Number),
       title: "asd",
       description: "asd",
@@ -420,12 +420,12 @@ describe('Recipe test', () => {
       serving: 3,
       time: 3,
       Tags: expect.arrayContaining([expect.objectContaining({ name: "asd" }), expect.objectContaining({ name: "asdf" })])
-    }])
+    }]))
     done();
   })
 
   test('edit recipe success', async (done) => {
-    const { mutate } = createTestClient(serverTest(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const filename = './tests/download.jpeg';
     const file = fs.createReadStream(resolve(filename))
@@ -482,7 +482,7 @@ describe('Recipe test', () => {
   })
 
   test('delete recipe success', async (done) => {
-    const { mutate } = createTestClient(serverTest(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
       mutation deleteRecipe($id: Int!) {
