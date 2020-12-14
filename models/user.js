@@ -18,21 +18,83 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     username: {
       type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'username is required'
+        },
+        isNumeric: {
+          args: false,
+          msg: 'username must contain word'
+        }
+      }
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'email is required'
+        },
+        isEmail: {
+          args: true,
+          msg: 'only allow email'
+        }
+      }
     },
     password: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'password is required'
+        }
+      }
     },
     gender: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        allowNull: {
+          args: true,
+          msg: 'gender is required'
+        },
+        isAlpha: {
+          args: true,
+          msg: 'gender only allow word'
+        }
+      }
     },
     name: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        allowNull: {
+          args: true,
+          msg: 'gender is required'
+        },
+        isAlpha: {
+          args: true,
+          msg: 'gender only allow word'
+        }
+      }
     },
     avatar: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        allowNull: {
+          args: true,
+          msg: 'gender is required'
+        },
+        isAlpha: {
+          args: true,
+          msg: 'gender only allow word'
+        }
+      }
     }
   }, {
     sequelize,
