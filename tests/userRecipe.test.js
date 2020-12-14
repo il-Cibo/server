@@ -1,7 +1,7 @@
 const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
 const fs = require('fs')
-const { serverTest, server } = require('../app')
+const { server } = require('../app')
 const { resolve } = require('path');
 const { User } = require('../models/');
 const { JSONWebToken } = require('../helpers');
@@ -29,7 +29,7 @@ beforeAll(async () => {
   const token = JSONWebToken.signToken(tokenPayload);
   userToken = token
 
-  const { query, mutate } = createTestClient(serverTest(userToken));
+  const { query, mutate } = createTestClient(server(userToken));
 
   const filename = './tests/download.jpeg';
   const file = fs.createReadStream(resolve(filename))
@@ -84,7 +84,7 @@ afterAll(async () => {
 describe('add favorite', () => {
 
   test('add favorite success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await mutate({
       mutation: gql`
@@ -106,7 +106,7 @@ describe('add favorite', () => {
 describe('find favorite', () => {
 
   test('find favorite success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await query({
       query: gql`
@@ -129,7 +129,7 @@ describe('find favorite', () => {
 describe('delete favorite', () => {
 
   test('delete favorite success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await mutate({
       mutation: gql`
@@ -151,7 +151,7 @@ describe('delete favorite', () => {
 describe('add plan', () => {
 
   test('add plan success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await mutate({
       mutation: gql`
@@ -172,7 +172,7 @@ describe('add plan', () => {
 describe('find plan', () => {
 
   test('find plan success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await query({
       query: gql`
@@ -195,7 +195,7 @@ describe('find plan', () => {
 describe('delete plan', () => {
 
   test('delete plan success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken));
+    const { query, mutate } = createTestClient(server(userToken));
 
     const test = await mutate({
       mutation: gql`

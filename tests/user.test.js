@@ -1,28 +1,26 @@
 const { createTestClient } = require('apollo-server-testing');
 const { gql } = require('apollo-server')
-const fs = require('fs')
-const { serverTest, server } = require('../app')
-const { resolve } = require('path');
+const { server } = require('../app')
 const { User } = require('../models/');
 
 let userToken
 let UserId
 
-beforeAll(() => {
-  server.context = () => {
-    const req = {
-      headers: {
-        "token": ''
-      }
-    }
-    return { req }
-  };
-})
+// beforeAll(() => {
+//   server.context = () => {
+//     const req = {
+//       headers: {
+//         "token": ''
+//       }
+//     }
+//     return { req }
+//   };
+// })
 
 describe('user register test', () => {
 
   test('user register success', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -54,7 +52,7 @@ describe('user register test', () => {
   })
 
   test('user register error, input empty', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -87,7 +85,7 @@ describe('user register test', () => {
   })
 
   test('user register error, wrong data type', async () => {
-    const { mutate } = createTestClient(server)
+    const { mutate } = createTestClient(server())
 
     const test = await mutate({
       mutation: gql`
@@ -116,7 +114,7 @@ describe('user register test', () => {
 describe('user login test', () => {
 
   test('user login success', async () => {
-    const { query } = createTestClient(server)
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -137,7 +135,7 @@ describe('user login test', () => {
   })
 
   test('user login error, input empty', async () => {
-    const { query } = createTestClient(server)
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -155,7 +153,7 @@ describe('user login test', () => {
   })
 
   test('user login error, wrong data type', async () => {
-    const { query } = createTestClient(server)
+    const { query } = createTestClient(server())
 
     const test = await query({
       query: gql`
@@ -176,7 +174,7 @@ describe('user login test', () => {
 describe('fetch user data test', () => {
 
   test('fetch user data success', async () => {
-    const { query, mutate } = createTestClient(serverTest(userToken))
+    const { query, mutate } = createTestClient(server(userToken))
 
     const MUTATION = `
       mutation createRecipe($recipe: NewRecipe, $tags: [String!]) {
@@ -252,7 +250,7 @@ describe('fetch user data test', () => {
   })
 
   test('fetch user data error, token invalid', async () => {
-    const { query } = createTestClient(serverTest('userToken'))
+    const { query } = createTestClient(server('userToken'))
 
     const test = await query({
       query: gql`
