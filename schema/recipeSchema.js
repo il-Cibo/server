@@ -51,21 +51,25 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    recipe: async (_, args) => {
+    recipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
-      const data = await Recipe.findOne({ where: { UserId: args.id }, include: { model: Tag } })
-      return data
+      const data = await Recipe.findByPk(args.id, {
+        include: Tag
+      });
+      return data;
     },
-    recipes: async (parent, args, context) => {
+    recipes: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
-      const data = await Recipe.findAll({ include: { model: Tag } })
-      return data
+      const data = await Recipe.findAll({
+        include: Tag
+      });
+      return data;
     },
-    queryRecipes: async (_, args) => {
+    queryRecipes: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
       const { query } = args;
 
-      const result = Recipe.findAll({
+      const result = await Recipe.findAll({
         where: {
           [Op.or]: [
             {
@@ -122,7 +126,7 @@ const resolvers = {
       const result = await Recipe.findByPk(data.id, {
         include: Tag
       })
-      // console.log(result)
+      // console.log(result, "ini di recipe schemaaaaaaaaaaaaaaaaaaaaaaa")
       return result;
     },
     editRecipe: async (_, args, context) => {
@@ -177,6 +181,8 @@ const resolvers = {
     },
     deleteRecipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
+      
+      const { user } = context;
 
       const authorization = await UserRecipe.findOne({
         where: {
@@ -184,12 +190,14 @@ const resolvers = {
           UserId: user.id
         }
       })
-
+      
+      // console.log(authorization, 'masukkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
       if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
 
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
       await Recipe.destroy({ where: { id: args.id } });
-      await RecipeTag.destroy({ where: { RecipeId: args.id } })
+      // console.log(deleted, 'ini di schemaaaaaaaaaaaaaaaaaaaaa');
+      // await RecipeTag.destroy({ where: { RecipeId: args.id } })
       return { message: "Recipe has been deleted" };
     }
   }

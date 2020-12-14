@@ -54,7 +54,8 @@ const server = new ApolloServer({
 const serverTest = (token) => new ApolloServer({
   schema,
   context: async () => {
-    const decoded = JSONWebToken.verifyToken(token)
+    if (!token) return { user: null }
+    const decoded = JSONWebToken.verifyToken(token);
     if (!decoded) throw new AuthenticationError('Invalid username or password');
     const user = await User.findByPk(decoded.id, {
       include: {
