@@ -252,7 +252,7 @@ describe('fetch user data test', () => {
   })
 
   test('fetch user data error, token invalid', async () => {
-    const { query } = createTestClient(serverTest('userToken'))
+    const { query } = createTestClient(serverTest())
 
     const test = await query({
       query: gql`
@@ -269,7 +269,7 @@ describe('fetch user data test', () => {
       }`
     })
 
-    console.log(test)
+    console.log(test, '<<<<<<<<<<<<<<<< MAIN PROBLEM')
   })
 })
 
