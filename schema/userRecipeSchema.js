@@ -73,7 +73,12 @@ const resolvers = {
       const [recipe] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
-        favorites: true
+      }, {
+        fields: {
+          RecipeId,
+          UserId: user.id,
+          favorites: true        
+        }
       });
 
       return recipe;
@@ -89,7 +94,12 @@ const resolvers = {
       const [recipe] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
-        favorites: false
+      }, {
+        fields: {
+          RecipeId,
+          UserId: user.id,
+          favorites: false        
+        }
       });
 
       return recipe;
@@ -104,7 +114,12 @@ const resolvers = {
       const [result] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
-        plan: sequelize.fn('array_append', sequelize.col('plan') ? sequelize.col('plan') : [], plan)
+      }, {
+        fields: {
+          RecipeId,
+          UserId: user.id,
+          plan: sequelize.col('plan') ? sequelize.fn('array_append', sequelize.col('plan'), plan) : [plan]
+        }
       })
 
       return result;
