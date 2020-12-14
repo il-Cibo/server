@@ -29,7 +29,7 @@ beforeAll(async () => {
   const token = JSONWebToken.signToken(tokenPayload);
   userToken = token
 
-  const { query, mutate } = createTestClient(server(token));
+  const { mutate } = createTestClient(server(token));
 
   const filename = './tests/download.jpeg';
   const file = fs.createReadStream(resolve(filename))
@@ -73,7 +73,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  const { query, mutate } = createTestClient(server(userToken));
+  const { mutate } = createTestClient(server(userToken));
 
   const MUTATION = `
   mutation delete ($RecipeId: Int!) {
@@ -99,7 +99,7 @@ afterAll(async () => {
 describe('add favorite', () => {
 
   test('add favorite success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
     mutation add($RecipeId: Int!) {
@@ -128,7 +128,7 @@ describe('add favorite', () => {
   })
 
   test('add favorite success when favorite already created', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     await UserRecipe.update({ favorites: false }, { where: { UserId, RecipeId } })
 
@@ -159,7 +159,7 @@ describe('add favorite', () => {
   })
 
   test('add favorite error, token invalid', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { mutate } = createTestClient(server('userToken'));
 
     const MUTATION = `
     mutation add($RecipeId: Int!) {
@@ -189,7 +189,7 @@ describe('add favorite', () => {
 describe('find favorite', () => {
 
   test('find favorite success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { query } = createTestClient(server(userToken));
 
     const test = await query({
       query: gql`
@@ -201,6 +201,7 @@ describe('find favorite', () => {
           name
           avatar
           Recipes {
+            UserRecipe { favorites plan }
             Tags {
               name
             }
@@ -214,13 +215,13 @@ describe('find favorite', () => {
       gender: expect.any(String),
       name: expect.any(String),
       avatar: expect.any(String),
-      Recipes: expect.arrayContaining([expect.any(Object)])
+      Recipes: expect.arrayContaining([expect.objectContaining({ UserRecipe: expect.objectContaining({ favorites: expect.any(Boolean) }) })]),
     })
     done()
   })
 
   test('find favorite error, token invalid', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { query } = createTestClient(server('userToken'));
 
     const test = await query({
       query: gql`
@@ -246,7 +247,7 @@ describe('find favorite', () => {
 describe('delete favorite', () => {
 
   test('delete favorite success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
     mutation delete($RecipeId: Int!) {
@@ -275,7 +276,7 @@ describe('delete favorite', () => {
   })
 
   test('delete favorite error, token invalid', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { mutate } = createTestClient(server('userToken'));
 
     const MUTATION = `
     mutation delete($RecipeId: Int!) {
@@ -305,7 +306,7 @@ describe('delete favorite', () => {
 describe('add plan', () => {
 
   test('add plan success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
     mutation addPlan($RecipeId: Int!, $plan: String!) {
@@ -335,7 +336,7 @@ describe('add plan', () => {
   })
 
   test('add plan success when plan already created', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
     mutation addPlan($RecipeId: Int!, $plan: String!) {
@@ -365,7 +366,7 @@ describe('add plan', () => {
   })
 
   test('add plan error, invalid token', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { mutate } = createTestClient(server('userToken'));
 
     const MUTATION = `
     mutation addPlan($RecipeId: Int!, $plan: String!) {
@@ -396,7 +397,7 @@ describe('add plan', () => {
 describe('find plan', () => {
 
   test('find plan success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { query } = createTestClient(server(userToken));
 
     const test = await query({
       query: gql`
@@ -407,6 +408,12 @@ describe('find plan', () => {
           gender
           name
           avatar
+          Recipes {
+            UserRecipe { favorites plan }
+            Tags {
+              name
+            }
+          }
         }
       }`
     })
@@ -416,13 +423,14 @@ describe('find plan', () => {
       email: expect.any(String),
       gender: expect.any(String),
       name: expect.any(String),
-      avatar: expect.any(String)
+      avatar: expect.any(String),
+      Recipes: expect.arrayContaining([expect.objectContaining({ UserRecipe: expect.objectContaining({ plan: expect.any(Array) }) })]),
     })
     done()
   })
 
   test('find plan error, invalid token', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { query } = createTestClient(server('userToken'));
 
     const test = await query({
       query: gql`
@@ -448,7 +456,7 @@ describe('find plan', () => {
 describe('delete plan', () => {
 
   test('delete plan success', async (done) => {
-    const { query, mutate } = createTestClient(server(userToken));
+    const { mutate } = createTestClient(server(userToken));
 
     const MUTATION = `
     mutation delete($RecipeId: Int!) {
@@ -475,7 +483,7 @@ describe('delete plan', () => {
   })
 
   test('delete plan error, invalid token', async (done) => {
-    const { query, mutate } = createTestClient(server('userToken'));
+    const { mutate } = createTestClient(server('userToken'));
 
     const MUTATION = `
     mutation delete($RecipeId: Int!) {
