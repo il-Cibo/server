@@ -181,7 +181,7 @@ const resolvers = {
     },
     deleteRecipe: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
-      
+
       const { user } = context;
 
       const authorization = await UserRecipe.findOne({
@@ -190,14 +190,11 @@ const resolvers = {
           UserId: user.id
         }
       })
-      
-      // console.log(authorization, 'masukkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
+
       if (!authorization) throw new ForbiddenError(`You're not allowed to do that`);
 
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
       await Recipe.destroy({ where: { id: args.id } });
-      // console.log(deleted, 'ini di schemaaaaaaaaaaaaaaaaaaaaa');
-      // await RecipeTag.destroy({ where: { RecipeId: args.id } })
       return { message: "Recipe has been deleted" };
     }
   }

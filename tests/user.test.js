@@ -156,6 +156,25 @@ describe('user login test', () => {
     expect(test.errors).toEqual(expect.any(Array))
     done()
   })
+
+  test('user login error, wrong password', async (done) => {
+    const { query } = createTestClient(server())
+
+    const test = await query({
+      query: gql`
+      query {
+        login(user: {
+          username: "usertest"
+          password: "asd"
+        }) {
+          token
+        }
+      }`
+    })
+
+    expect(test.errors).toEqual(expect.any(Array))
+    done()
+  })
 })
 
 describe('fetch user data test', () => {

@@ -70,19 +70,24 @@ const resolvers = {
 
       const { user } = context;
       const { id: RecipeId } = args;
-      const [recipe] = await UserRecipe.upsert({
-        RecipeId,
-        UserId: user.id,
-      }, {
-        fields: {
-          RecipeId,
+
+      let [recipe, created] = await UserRecipe.findOrCreate({
+        where: {
           UserId: user.id,
-          favorites: true        
+          RecipeId
+        }, defaults: {
+          favorites: true
         }
-      });
+      })
 
+      if (!created) {
+        recipe = await UserRecipe.update({ favorites: true }, {
+          where: { UserId: user.id, RecipeId }, returning: true
+        })
+
+        return recipe[1][0]
+      }
       return recipe;
-
     },
 
     deleteFav: async (parent, args, context) => {
@@ -91,18 +96,16 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId } = args;
 
-      const [recipe] = await UserRecipe.upsert({
-        RecipeId,
-        UserId: user.id,
+      const recipe = await UserRecipe.update({
+        favorites: false
       }, {
-        fields: {
+        where: {
           RecipeId,
-          UserId: user.id,
-          favorites: false        
-        }
+          UserId: user.id
+        }, returning: true
       });
 
-      return recipe;
+      return recipe[1][0];
     },
 
     addToPlan: async (parent, args, context) => {
@@ -111,16 +114,21 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId, plan } = args;
 
-      const [result] = await UserRecipe.upsert({
-        RecipeId,
-        UserId: user.id,
-      }, {
-        fields: {
-          RecipeId,
+      let [result, created] = await UserRecipe.findOrCreate({
+        where: {
           UserId: user.id,
-          plan: sequelize.col('plan') ? sequelize.fn('array_append', sequelize.col('plan'), plan) : [plan]
+          RecipeId
+        }, defaults: {
+          plan: [plan]
         }
       })
+
+      if (!created) {
+        result = await UserRecipe.update({ plan: sequelize.fn('array_append', sequelize.col('plan'), plan) }, {
+          where: { UserId: user.id, RecipeId }, returning: true
+        })
+        return result[1][0]
+      }
 
       return result;
     },
@@ -131,17 +139,16 @@ const resolvers = {
       const { user } = context;
       const { id: RecipeId, plan } = args;
 
-      const result = await UserRecipe.update({
+      const recipe = await UserRecipe.update({
         plan: sequelize.fn('array_remove', sequelize.col('plan'), plan)
       }, {
         where: {
           RecipeId,
           UserId: user.id
-        },
-        returning: true
+        }, returning: true
       });
 
-      return result[1][0];
+      return recipe[1][0];
     }
   }
 }
