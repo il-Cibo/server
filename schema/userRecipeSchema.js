@@ -11,8 +11,8 @@ const typeDefs = gql`
   }
 
   extend type Query {
-    findFav: User
-    findPlan: User 
+    findFav: UserData
+    findPlan: UserData 
   }
 
   extend type Mutation {

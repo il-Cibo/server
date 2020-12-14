@@ -1,6 +1,6 @@
 const { gql, AuthenticationError } = require('apollo-server');
 const { Bcrypt, JSONWebToken } = require('../helpers');
-const { User, Recipe, Tag } = require('../models');
+const { User, Recipe, Tag, UserRecipe } = require('../models');
 
 const typeDefs = gql`
   input Register {
@@ -73,12 +73,18 @@ const resolvers = {
 
       return { token };
     },
-    user: async (parent, args, context) => {
+    user: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError('Please login first');
       const { user } = context;
       return await User.findByPk(user.id, {
         include: {
           model: Recipe,
+          through: {
+            model: UserRecipe,
+            where: {
+              creation: true
+            }
+          },
           include: Tag
         }
       });
