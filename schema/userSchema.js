@@ -1,6 +1,6 @@
 const { gql, AuthenticationError } = require('apollo-server');
 const { Bcrypt, JSONWebToken } = require('../helpers');
-const { User } = require('../models');
+const { User, Recipe, Tag } = require('../models');
 
 const typeDefs = gql`
   input Register {
