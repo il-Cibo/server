@@ -11,8 +11,8 @@ const typeDefs = gql`
   }
 
   extend type Query {
-    findFav: User
-    findPlan: User 
+    findFav: UserData
+    findPlan: UserData 
   }
 
   extend type Mutation {
@@ -70,7 +70,6 @@ const resolvers = {
 
       const { user } = context;
       const { id: RecipeId } = args;
-
       const [recipe] = await UserRecipe.upsert({
         RecipeId,
         UserId: user.id,
@@ -115,7 +114,7 @@ const resolvers = {
       if (!context.user) throw new AuthenticationError("Please login first");
 
       const { user } = context;
-      const { plan } = args;
+      const { id: RecipeId, plan } = args;
 
       const result = await UserRecipe.update({
         plan: sequelize.fn('array_remove', sequelize.col('plan'), plan)

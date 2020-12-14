@@ -29,7 +29,7 @@ beforeAll(async () => {
   const token = JSONWebToken.signToken(tokenPayload);
   userToken = token
 
-  const { query, mutate } = createTestClient(server(userToken));
+  const { query, mutate } = createTestClient(server(token));
 
   const filename = './tests/download.jpeg';
   const file = fs.createReadStream(resolve(filename))
@@ -384,7 +384,11 @@ describe('delete plan', () => {
       }
     })
 
-    console.log(test)
+    expect(test.data.removePlan).toEqual({
+      UserId: expect.any(Number),
+      favorites: expect.any(Boolean),
+      plan: expect.any(Array)
+    })
     done()
   })
 
