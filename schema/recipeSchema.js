@@ -21,6 +21,7 @@ const typeDefs = gql`
       serving: Int
       time: Int
       Tags: [Tag]
+      UserRecipe: UserRecipe
     }
 
     type Response {
@@ -148,12 +149,12 @@ const resolvers = {
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
 
       const findRecipe = await Recipe.findByPk(args.id)
-      const key = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
+      const uniqueId = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
       const { createReadStream, filename, mimetype } = await args.recipe.image;
-      const coba = `${key}${extname(filename)}`
+      const key = `${uniqueId}${extname(filename)}`
       const { Location } = await s3.upload({
         Body: createReadStream(),
-        Key: coba,
+        Key: key,
         ContentType: mimetype
       }).promise();
 
