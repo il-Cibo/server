@@ -6,36 +6,37 @@ const { resolve } = require('path');
 const { JSONWebToken } = require('../helpers');
 
 let userToken;
-let UserId;
+let userToken2
 let RecipeId;
 
 beforeAll(async (done) => {
-  const create = await User.create({
+  const create = await User.bulkCreate([{
     username: 'test',
     email: 'test@test.com',
     password: 'test123',
     gender: 'test',
     name: 'test',
     avatar: 'test'
-  }, { returning: true })
+  }, {
+    username: 'test1',
+    email: 'test1@test.com',
+    password: 'test123',
+    gender: 'test',
+    name: 'test',
+    avatar: 'test'
+  }], { returning: true })
 
-  UserId = create.id;
 
-  const tokenPayload = {
-    id: create.id,
-    username: create.username
-  }
-  const token = JSONWebToken.signToken(tokenPayload);
-  userToken = token
+  create.forEach((el, i) => {
+    let token = JSONWebToken.signToken({ id: el.id, username: el.username })
+    !i ? userToken = token : userToken2 = token
+  })
+
   done();
 })
 
 afterAll(async (done) => {
-  await User.destroy({
-    where: {
-      id: UserId
-    }
-  })
+  await User.destroy({ where: {} })
   done();
 })
 
@@ -509,6 +510,31 @@ describe('Recipe test', () => {
 
     expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
       message: "Please login first"
+    })]));
+
+    done();
+  })
+
+  test('delete recipe error, user unauthorized', async (done) => {
+    const { mutate } = createTestClient(server(userToken2));
+
+    const MUTATION = `
+      mutation deleteRecipe($id: Int!) {
+        deleteRecipe(id: $id) {
+          message
+        }
+      }
+    `;
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        id: RecipeId
+      }
+    });
+
+    expect(test.errors).toEqual(expect.arrayContaining([expect.objectContaining({
+      message: "You're not allowed to do that"
     })]));
 
     done();

@@ -3,7 +3,7 @@ const { gql } = require('apollo-server')
 const fs = require('fs')
 const { server } = require('../app')
 const { resolve } = require('path');
-const { User } = require('../models/');
+const { User, UserRecipe } = require('../models/');
 const { JSONWebToken } = require('../helpers');
 
 let userToken
@@ -118,7 +118,43 @@ describe('add favorite', () => {
       }
     })
 
-    console.log(test)
+    expect(test.data.addFav).toEqual({
+      UserId: expect.any(Number),
+      RecipeId: expect.any(Number),
+      favorites: true,
+      plan: expect.any(Array)
+    })
+    done()
+  })
+
+  test('add favorite success when favorite already created', async (done) => {
+    const { query, mutate } = createTestClient(server(userToken));
+
+    await UserRecipe.update({ favorites: false }, { where: { UserId, RecipeId } })
+
+    const MUTATION = `
+    mutation add($RecipeId: Int!) {
+      addFav(id: $RecipeId) {
+        UserId
+        RecipeId
+        favorites
+        plan
+      }
+    }`
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        RecipeId
+      }
+    })
+
+    expect(test.data.addFav).toEqual({
+      UserId: expect.any(Number),
+      RecipeId: expect.any(Number),
+      favorites: true,
+      plan: expect.any(Array)
+    })
     done()
   })
 
@@ -164,6 +200,11 @@ describe('find favorite', () => {
           gender
           name
           avatar
+          Recipes {
+            Tags {
+              name
+            }
+          }
         }
       }`
     })
@@ -172,7 +213,8 @@ describe('find favorite', () => {
       email: expect.any(String),
       gender: expect.any(String),
       name: expect.any(String),
-      avatar: expect.any(String)
+      avatar: expect.any(String),
+      Recipes: expect.arrayContaining([expect.any(Object)])
     })
     done()
   })
@@ -223,7 +265,12 @@ describe('delete favorite', () => {
       }
     })
 
-    console.log(test)
+    expect(test.data.deleteFav).toEqual({
+      UserId: expect.any(Number),
+      RecipeId: expect.any(Number),
+      favorites: false,
+      plan: expect.any(Array)
+    })
     done()
   })
 
@@ -278,7 +325,42 @@ describe('add plan', () => {
       }
     })
 
-    console.log(test)
+    expect(test.data.addToPlan).toEqual({
+      RecipeId: expect.any(Number),
+      UserId: expect.any(Number),
+      favorites: expect.any(Boolean),
+      plan: expect.arrayContaining(["12-12-2022"])
+    })
+    done()
+  })
+
+  test('add plan success when plan already created', async (done) => {
+    const { query, mutate } = createTestClient(server(userToken));
+
+    const MUTATION = `
+    mutation addPlan($RecipeId: Int!, $plan: String!) {
+      addToPlan(id: $RecipeId, plan: $plan) {
+        UserId
+        RecipeId
+        favorites
+        plan
+      }
+    }`
+
+    const test = await mutate({
+      mutation: MUTATION,
+      variables: {
+        RecipeId,
+        plan: "11-12-2022"
+      }
+    })
+
+    expect(test.data.addToPlan).toEqual({
+      RecipeId: expect.any(Number),
+      UserId: expect.any(Number),
+      favorites: expect.any(Boolean),
+      plan: expect.arrayContaining(["11-12-2022", "12-12-2022"])
+    })
     done()
   })
 
@@ -387,7 +469,7 @@ describe('delete plan', () => {
     expect(test.data.removePlan).toEqual({
       UserId: expect.any(Number),
       favorites: expect.any(Boolean),
-      plan: expect.any(Array)
+      plan: ["11-12-2022"]
     })
     done()
   })

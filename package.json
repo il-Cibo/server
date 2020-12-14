@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon app",
-    "test": "jest --detectOpenHandles --verbose --runInBand --coverage"
+    "test": "jest --detectOpenHandles --verbose --runInBand --coverage --forceExit"
   },
   "keywords": [],
   "author": "",
