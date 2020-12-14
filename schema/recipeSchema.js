@@ -61,6 +61,7 @@ const resolvers = {
     recipes: async (_, args, context) => {
       if (!context.user) throw new AuthenticationError("Please login first");
       const data = await Recipe.findAll({
+        order: ['id', 'DESC'],
         include: Tag
       });
       return data;
