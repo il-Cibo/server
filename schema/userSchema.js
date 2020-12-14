@@ -1,20 +1,20 @@
 const { gql, AuthenticationError } = require('apollo-server');
 const { Bcrypt, JSONWebToken } = require('../helpers');
-const { User } = require('../models');
+const { User, Recipe, Tag } = require('../models');
 
 const typeDefs = gql`
   input Register {
-    username: String
-    email: String
-    password: String
-    gender: String
-    name: String
-    avatar: String
+    username: String!
+    email: String!
+    password: String!
+    gender: String!
+    name: String!
+    avatar: String!
   }
 
   input Login {
-    username: String
-    password: String
+    username: String!
+    password: String!
   }
 
   type User {
@@ -40,12 +40,12 @@ const typeDefs = gql`
   }
 
   extend type Query {
-    login(user: Login): Token
+    login(user: Login!): Token
     user: UserData 
   }
 
   extend type Mutation {
-    register(user: Register): User
+    register(user: Register!): User
   }
 `
 
@@ -61,10 +61,10 @@ const resolvers = {
         }
       });
 
-      if (!user) throw new AuthenticationError ('Invalid email or password');
+      if (!user) throw new AuthenticationError('Invalid email or password');
 
-      if (!Bcrypt.comparePassword(password, user.password)) throw new AuthenticationError ('Invalid email or password');
-      
+      if (!Bcrypt.comparePassword(password, user.password)) throw new AuthenticationError('Invalid email or password');
+
       const tokenPayload = {
         id: user.id,
         username: user.username

@@ -25,7 +25,6 @@ beforeAll(async () => {
     username: create.username
   }
   const token = JSONWebToken.signToken(tokenPayload);
-
   userToken = token
 })
 
@@ -140,7 +139,6 @@ afterAll(async () => {
 describe('create recipe test', () => {
 
   test('create recipe success', async () => {
-
     const { query, mutate } = createTestClient(serverTest(userToken));
 
     const filename = './tests/download.jpeg';
@@ -183,7 +181,6 @@ describe('create recipe test', () => {
     expect(test.data.addRecipe).toHaveProperty('id')
   })
 })
-
 // describe('edit recipe test', () => {
 
 //   test('edit recipe success', async () => {
@@ -250,3 +247,5 @@ describe('create recipe test', () => {
 //     expect(test).toHaveProperty('message')
 //   })
 // })
+
+module.exports = userToken
