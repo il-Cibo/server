@@ -38,7 +38,7 @@ const server = (token) => new ApolloServer({
         }
       }
     }
-    
+
     if (!payload) return data;
 
     const { req } = payload;
