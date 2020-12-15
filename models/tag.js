@@ -21,11 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'name is required'
-        },
-        isAlpha: {
-          args: true,
-          msg: 'name cannot contain number'
+          msg: 'Tag name is required'
         }
       }
     }
