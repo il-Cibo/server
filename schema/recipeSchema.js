@@ -98,10 +98,9 @@ const resolvers = {
       if (!context.user) throw new AuthenticationError("Please login first");
       const { id } = context.user;
       const { createReadStream, filename, mimetype } = await args.recipe.image;
-      let coba = `${uuid()}${extname(filename)}`
       const { Location } = await s3.upload({
         Body: createReadStream(),
-        Key: coba,
+        Key: `${uuid()}${extname(filename)}`,
         ContentType: mimetype
       }).promise();
       args.recipe.image = Location;
@@ -151,10 +150,9 @@ const resolvers = {
       const findRecipe = await Recipe.findByPk(args.id)
       const uniqueId = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
       const { createReadStream, filename, mimetype } = await args.recipe.image;
-      const key = `${uniqueId}${extname(filename)}`
       const { Location } = await s3.upload({
         Body: createReadStream(),
-        Key: key,
+        Key: `${uniqueId}${extname(filename)}`,
         ContentType: mimetype
       }).promise();
 
