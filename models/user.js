@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         isAlpha: {
           args: true,
-          msg: 'username must contain word'
+          msg: 'username cannot contain symbol or space'
         }
       }
     },
@@ -74,27 +74,13 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'gender is required'
-        },
-        isAlpha: {
-          args: true,
-          msg: 'gender only allow word'
+          msg: 'name is required'
         }
       }
     },
     avatar: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: {
-          args: true,
-          msg: 'gender is required'
-        },
-        isAlpha: {
-          args: true,
-          msg: 'gender only allow word'
-        }
-      }
     }
   }, {
     sequelize,
