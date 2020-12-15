@@ -23,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: {
           args: true,
           msg: 'title is required'
-        },
-        isAlpha: {
-          ags: true,
-          msg: 'title cannot contain number'
         }
       }
     },
