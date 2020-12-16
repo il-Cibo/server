@@ -24,6 +24,19 @@ const typeDefs = gql`
       UserRecipe: UserRecipe
     }
 
+    type AllRecipe {
+      id: Int
+      title: String
+      description: String
+      image: String
+      ingredients: [String]
+      step: [String]
+      serving: Int
+      time: Int
+      Tags: [Tag]
+      Users: [User]
+    }
+
     type Response {
       message: String
     }
@@ -41,7 +54,7 @@ const typeDefs = gql`
     extend type Query {
       recipe(id: Int!): Recipe
       recipes: [Recipe]
-      queryRecipes(query: String!): [Recipe]
+      queryRecipes(query: String!): [AllRecipe]
     }
     extend type Mutation {
       addRecipe(recipe: NewRecipe, tags: [String!]): Recipe
@@ -63,7 +76,20 @@ const resolvers = {
       if (!context.user) throw new AuthenticationError("Please login first");
       const data = await Recipe.findAll({
         order: [['id', 'DESC']],
-        include: Tag
+        include: [
+          {
+            model: Tag
+          },
+          {
+            model: User,
+            through: {
+              model: UserRecipe,
+              where: {
+                creation: true
+              }
+            }
+          }
+        ]
       });
       return data;
     },
