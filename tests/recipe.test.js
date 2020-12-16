@@ -235,6 +235,7 @@ describe('Recipe test', () => {
           serving
           time
           Tags { name }
+          Users { name }
         }
       }
     `
@@ -251,7 +252,8 @@ describe('Recipe test', () => {
       step: expect.arrayContaining([expect.any(String)]),
       serving: expect.any(Number),
       time: expect.any(Number),
-      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) }), expect.objectContaining({ name: "asdf" })])
+      Tags: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) }), expect.objectContaining({ name: "asdf" })]),
+      Users: expect.arrayContaining([expect.objectContaining({ name: expect.any(String) })])
     }]))
     done();
   })
