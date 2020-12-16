@@ -1,4 +1,4 @@
-const { Recipe, UserRecipe, Tag, RecipeTag } = require('../models');
+const { Recipe, UserRecipe, Tag, RecipeTag, User } = require('../models');
 const { Op } = require('sequelize');
 const { gql, ForbiddenError, AuthenticationError } = require('apollo-server');
 const { extname } = require('path');
