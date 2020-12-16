@@ -53,7 +53,7 @@ const typeDefs = gql`
     
     extend type Query {
       recipe(id: Int!): Recipe
-      recipes: [Recipe]
+      recipes: [AllRecipe]
       queryRecipes(query: String!): [AllRecipe]
     }
     extend type Mutation {
@@ -113,7 +113,20 @@ const resolvers = {
             }
           ]
         },
-        include: Tag
+        include: [
+          {
+            model: Tag
+          },
+          {
+            model: User,
+            through: {
+              model: UserRecipe,
+              where: {
+                creation: true
+              }
+            }
+          }
+        ]
       });
 
       return result;
