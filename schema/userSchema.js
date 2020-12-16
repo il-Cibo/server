@@ -18,6 +18,7 @@ const typeDefs = gql`
   }
 
   type User {
+    id: Int
     username: String
     email: String
     gender: String
