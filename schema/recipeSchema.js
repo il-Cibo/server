@@ -188,14 +188,17 @@ const resolvers = {
 
       const findRecipe = await Recipe.findByPk(args.id)
       const uniqueId = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
-      const { createReadStream, filename, mimetype } = await args.recipe.image;
-      const { Location } = await s3.upload({
-        Body: createReadStream(),
-        Key: `${uniqueId}${extname(filename)}`,
-        ContentType: mimetype
-      }).promise();
 
-      args.recipe.image = Location;
+      if (typeof args.recipe.image !== 'string') {
+        const { createReadStream, filename, mimetype } = await args.recipe.image;
+        const { Location } = await s3.upload({
+          Body: createReadStream(),
+          Key: `${uniqueId}${extname(filename)}`,
+          ContentType: mimetype
+        }).promise();
+  
+        args.recipe.image = Location;
+      }
 
       const data = await Recipe.update(args.recipe, {
         where: { id: args.id },
