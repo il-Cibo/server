@@ -63,7 +63,9 @@ const server = (token) => new ApolloServer({
     data.user = user;
     // ! add the user to the context
     return data;
-  }
+  },
+  introspection: true,
+  playground: true
 });
 
 if (process.env.NODE_ENV !== 'test') {
