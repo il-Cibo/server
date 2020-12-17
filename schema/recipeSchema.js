@@ -44,7 +44,7 @@ const typeDefs = gql`
     input NewRecipe {
       title: String!
       description: String!
-      image: Upload!
+      image: Upload
       ingredients: [String!]
       step: [String!]
       serving: Int!
@@ -186,19 +186,17 @@ const resolvers = {
 
       if (!authorization.creation) throw new ForbiddenError(`You're not allowed to do that`);
 
-      const findRecipe = await Recipe.findByPk(args.id)
-      const uniqueId = findRecipe.image.slice(findRecipe.image.lastIndexOf('/') + 1, findRecipe.image.lastIndexOf('.'))
-
-      if (typeof args.recipe.image !== 'string') {
+      if (args.recipe.image) {
         const { createReadStream, filename, mimetype } = await args.recipe.image;
         const { Location } = await s3.upload({
           Body: createReadStream(),
-          Key: `${uniqueId}${extname(filename)}`,
+          Key: `${uuid()}${extname(filename)}`,
           ContentType: mimetype
         }).promise();
   
         args.recipe.image = Location;
       }
+
 
       const data = await Recipe.update(args.recipe, {
         where: { id: args.id },
